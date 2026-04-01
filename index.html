@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Responsibilities, Made Fun</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FAF7F2; --warm-white: #FFFDF9; --ink: #1C1A17; --ink-light: #5C574F; --ink-faint: #A09890;
+    --ryan: #3A6BC4; --ryan-light: #D8E4F0; --louise: #C4603A; --louise-light: #F0E0D8;
+    --gold: #C9A84C; --gold-light: #F5EDD4; --border: #E8E2D9; --shadow: 0 2px 16px rgba(28,26,23,0.07);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; padding: 48px 24px 80px; }
+  .page { max-width: 780px; margin: 0 auto; }
+
+  /* PASSWORD GATE */
+  #gate {
+    position: fixed; inset: 0; background: var(--cream); z-index: 1000;
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .gate-box {
+    background: var(--warm-white); border: 1px solid var(--border); border-radius: 16px;
+    padding: 40px 36px; max-width: 380px; width: 100%; box-shadow: 0 8px 40px rgba(28,26,23,0.12); text-align: center;
+  }
+  .gate-icon { font-size: 36px; margin-bottom: 16px; }
+  .gate-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+  .gate-sub { font-size: 14px; color: var(--ink-faint); margin-bottom: 28px; font-style: italic; }
+  .gate-input {
+    width: 100%; background: var(--cream); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 16px; font-size: 15px; font-family: 'DM Sans', sans-serif; color: var(--ink);
+    outline: none; text-align: center; letter-spacing: 0.05em; margin-bottom: 12px; transition: border-color 0.2s;
+  }
+  .gate-input:focus { border-color: var(--ryan); }
+  .gate-btn {
+    width: 100%; padding: 12px; border-radius: 10px; border: none; background: var(--ink);
+    color: var(--cream); font-size: 14px; font-weight: 500; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: background 0.15s;
+  }
+  .gate-btn:hover { background: var(--ryan); }
+  .gate-error { font-size: 13px; color: var(--louise); margin-top: 10px; display: none; }
+  #gate.hidden { display: none; }
+
+  /* HEADER */
+  .header { text-align: center; padding: 56px 0 48px; border-bottom: 1px solid var(--border); margin-bottom: 48px; }
+  .header h1 { font-family: 'Lora', serif; font-size: clamp(28px, 5vw, 44px); font-weight: 600; color: var(--ink); line-height: 1.2; margin-bottom: 8px; }
+  .header h1 .accent { color: var(--louise); }
+  .header-tagline { font-family: 'Lora', serif; font-style: italic; font-size: 14px; color: var(--ink-faint); margin-bottom: 14px; }
+  .header-sub { font-size: 15px; color: var(--ink-light); font-weight: 300; line-height: 1.6; max-width: 480px; margin: 0 auto; }
+  .header-date { margin-top: 18px; font-size: 12px; color: var(--ink-faint); letter-spacing: 0.08em; }
+  .reset-btn { margin-top: 16px; background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 12px; font-size: 11px; color: var(--ink-faint); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+  .reset-btn:hover { border-color: var(--louise); color: var(--louise); }
+
+  /* NEEDS */
+  .needs-section { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 48px; }
+  .needs-card { background: var(--warm-white); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: var(--shadow); }
+  .needs-card-label { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 12px; }
+  .needs-card.ryan .needs-card-label { color: var(--ryan); }
+  .needs-card.louise .needs-card-label { color: var(--louise); }
+  .needs-card-name { font-family: 'Lora', serif; font-size: 18px; font-weight: 600; margin-bottom: 10px; }
+  .needs-field { width: 100%; background: var(--cream); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink); resize: none; min-height: 64px; line-height: 1.5; outline: none; transition: border-color 0.2s; }
+  .needs-card.ryan .needs-field:focus { border-color: var(--ryan); }
+  .needs-card.louise .needs-field:focus { border-color: var(--louise); }
+  .needs-field::placeholder { color: var(--ink-faint); font-style: italic; }
+
+  /* SECTION TITLES */
+  .section-title { font-family: 'Lora', serif; font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* LEGEND */
+  .legend { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; padding: 14px 18px; background: var(--warm-white); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 36px; }
+  .legend-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-right: 4px; }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--ink-light); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* MONTHS */
+  .months-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 48px; }
+  .month-card { background: var(--warm-white); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); transition: box-shadow 0.2s; }
+  .month-card.drag-over { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold-light), var(--shadow); }
+  .month-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
+  .month-header-left { display: flex; align-items: center; gap: 14px; }
+  .month-badge { height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; padding: 0 12px; background: var(--cream); color: var(--ink-light); border: 1px solid var(--border); white-space: nowrap; letter-spacing: 0.03em; }
+  .month-card.has-content .month-badge { background: var(--ryan-light); color: var(--ryan); border-color: var(--ryan-light); }
+  .month-label { font-size: 15px; font-weight: 500; color: var(--ink); }
+  .month-preview { font-size: 12px; color: var(--ink-faint); margin-top: 2px; font-style: italic; }
+  .month-toggle { font-size: 18px; color: var(--ink-faint); transition: transform 0.2s; line-height: 1; }
+  .month-card.open .month-toggle { transform: rotate(180deg); }
+  .month-body { display: none; padding: 16px 20px 20px; }
+  .month-card.open .month-body { display: block; }
+  .drop-hint { display: none; border: 2px dashed var(--gold); border-radius: 8px; padding: 10px; text-align: center; font-size: 12px; color: var(--gold); margin-bottom: 10px; font-style: italic; }
+  .month-card.drag-over .drop-hint { display: block; }
+
+  /* ITEMS */
+  .items-list { list-style: none; margin-bottom: 12px; }
+  .item-row { display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .item-row:last-child { border-bottom: none; }
+  .item-icon { font-size: 16px; flex-shrink: 0; line-height: 1.5; }
+  .item-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 7px; }
+  .item-dot.ryan { background: var(--ryan); } .item-dot.louise { background: var(--louise); } .item-dot.shared { background: var(--gold); }
+  .item-main { flex: 1; min-width: 0; }
+  .item-text { font-size: 14px; color: var(--ink); line-height: 1.5; }
+  .item-cost-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; color: var(--ink-faint); background: var(--cream); border: 1px solid var(--border); border-radius: 20px; padding: 1px 8px; margin-top: 4px; }
+  .item-actions { display: flex; gap: 4px; flex-shrink: 0; opacity: 0; transition: opacity 0.15s; }
+  .item-row:hover .item-actions { opacity: 1; }
+  .item-delete { background: none; border: none; cursor: pointer; color: var(--ink-faint); font-size: 15px; line-height: 1; padding: 2px 4px; border-radius: 4px; transition: color 0.15s; }
+  .item-delete:hover { color: var(--louise); }
+
+  /* ADD FORM */
+  .add-form { border-top: 1px solid var(--border); padding-top: 14px; margin-top: 4px; }
+  .add-row1 { display: flex; gap: 8px; margin-bottom: 8px; }
+  .add-input { flex: 1; background: var(--cream); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--ink); outline: none; transition: border-color 0.2s; }
+  .add-input:focus { border-color: var(--ryan); }
+  .add-input::placeholder { color: var(--ink-faint); font-style: italic; }
+  .icon-picker-wrap { position: relative; flex-shrink: 0; }
+  .icon-picker-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: var(--cream); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .icon-picker-btn:hover { border-color: var(--ryan); }
+  .icon-grid-pop { display: none; position: absolute; z-index: 200; top: 42px; left: 0; background: var(--warm-white); border: 1px solid var(--border); border-radius: 10px; padding: 10px; box-shadow: 0 8px 24px rgba(28,26,23,0.15); width: 226px; }
+  .icon-grid-pop.open { display: block; }
+  .icon-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .icon-opt { width: 28px; height: 28px; border-radius: 6px; border: none; background: none; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.1s; }
+  .icon-opt:hover { background: var(--cream); } .icon-opt.sel { background: var(--ryan-light); }
+  .add-row2 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .who-group { display: flex; gap: 4px; }
+  .who-btn { padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--cream); font-size: 11px; font-weight: 500; cursor: pointer; letter-spacing: 0.05em; transition: all 0.15s; color: var(--ink-light); }
+  .who-btn.ryan:hover, .who-btn.ryan.active { background: var(--ryan-light); border-color: var(--ryan); color: var(--ryan); }
+  .who-btn.louise:hover, .who-btn.louise.active { background: var(--louise-light); border-color: var(--louise); color: var(--louise); }
+  .who-btn.shared:hover, .who-btn.shared.active { background: var(--gold-light); border-color: var(--gold); color: #8a6a1a; }
+  .cost-toggle { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-faint); cursor: pointer; user-select: none; }
+  .cost-toggle input[type=checkbox] { accent-color: var(--ryan); cursor: pointer; }
+  .cost-wrap { display: none; align-items: center; gap: 4px; }
+  .cost-wrap.show { display: flex; }
+  .cost-sym { font-size: 13px; color: var(--ink-faint); }
+  .cost-input { width: 76px; background: var(--cream); border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--ink); outline: none; }
+  .cost-input:focus { border-color: var(--ryan); }
+  .add-btn { padding: 7px 16px; border-radius: 8px; border: none; background: var(--ink); color: var(--cream); font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.15s; margin-left: auto; }
+  .add-btn:hover { background: var(--ryan); }
+
+  /* FUTURE */
+  .future-section { margin-bottom: 48px; }
+  .future-card { background: var(--warm-white); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: var(--shadow); transition: border-color 0.2s, box-shadow 0.2s; }
+  .future-card.drag-over { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold-light); }
+  .future-drop-hint { display: none; border: 2px dashed var(--gold); border-radius: 8px; padding: 10px; text-align: center; font-size: 12px; color: var(--gold); margin-bottom: 12px; font-style: italic; }
+  .future-card.drag-over .future-drop-hint { display: block; }
+
+  /* WISHLIST */
+  .wishlist-section { margin-bottom: 48px; }
+  .wishlist-intro { font-size: 13px; color: var(--ink-faint); font-style: italic; margin-bottom: 16px; }
+  .wishlist-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .wish-item { background: var(--warm-white); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow); cursor: grab; transition: all 0.15s; user-select: none; }
+  .wish-item:hover { box-shadow: 0 4px 20px rgba(28,26,23,0.12); transform: translateY(-1px); }
+  .wish-item.dragging { opacity: 0.35; cursor: grabbing; }
+  .wish-item.assigned { opacity: 0.45; }
+  .wish-icon { font-size: 22px; flex-shrink: 0; }
+  .wish-text { font-size: 14px; font-weight: 500; color: var(--ink); }
+  .wish-sub { font-size: 11px; color: var(--ink-faint); font-style: italic; margin-top: 2px; }
+  .wish-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 500; letter-spacing: 0.05em; background: var(--gold-light); color: #8a6a1a; margin-top: 4px; display: inline-block; }
+  .wish-delete { background: none; border: none; cursor: pointer; color: var(--ink-faint); font-size: 15px; padding: 2px 4px; border-radius: 4px; margin-left: auto; opacity: 0; transition: opacity 0.15s, color 0.15s; flex-shrink: 0; }
+  .wish-item:hover .wish-delete { opacity: 1; }
+  .wish-delete:hover { color: var(--louise); }
+  .add-wish-form { background: var(--warm-white); border: 1px solid var(--border); border-radius: 10px; padding: 16px; box-shadow: var(--shadow); }
+  .add-wish-title { font-size: 12px; font-weight: 500; color: var(--ink-faint); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
+
+  /* SYNC */
+  .sync-bar { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; z-index: 500; }
+  .sync-pill { background: var(--ink); color: var(--cream); font-size: 12px; padding: 8px 14px; border-radius: 8px; opacity: 0; transition: opacity 0.3s; pointer-events: none; font-family: 'DM Sans', sans-serif; }
+  .sync-pill.show { opacity: 1; }
+  .sync-pill.error { background: var(--louise); }
+
+  .footer-note { text-align: center; font-size: 12px; color: var(--ink-faint); margin-top: 40px; font-style: italic; }
+
+  @media (max-width: 560px) {
+    .needs-section { grid-template-columns: 1fr; }
+    .wishlist-grid { grid-template-columns: 1fr; }
+    .add-row2 { flex-wrap: wrap; }
+    .month-badge { font-size: 10px; padding: 0 8px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-icon">🗝️</div>
+    <div class="gate-title">Responsibilities, Made Fun</div>
+    <div class="gate-sub">Our plan. Enter the password to get in.</div>
+    <input class="gate-input" type="password" id="gateInput" placeholder="Password" onkeydown="if(event.key==='Enter')checkPassword()">
+    <button class="gate-btn" onclick="checkPassword()">Let me in</button>
+    <div class="gate-error" id="gateError">That's not it. Try again.</div>
+  </div>
+</div>
+
+<div class="page" id="mainContent" style="display:none">
+
+  <div class="header">
+    <h1>Responsibilities<span class="accent">, Made Fun</span></h1>
+    <div class="header-tagline">The life plan that doesn't feel like one</div>
+    <p class="header-sub">Not a contract. Not a rulebook. Just a shared map so we're both looking at the same road.</p>
+    <div class="header-date">Started April 2026</div>
+    <button class="reset-btn" onclick="confirmReset()">Clear all data</button>
+  </div>
+
+  <div class="section-title">What we each need from this year</div>
+  <div class="needs-section">
+    <div class="needs-card ryan">
+      <div class="needs-card-label">Ryan</div>
+      <div class="needs-card-name">What I need</div>
+      <textarea class="needs-field" id="needsRyan" placeholder="e.g. stability, a sense of progress, knowing what's ahead…"></textarea>
+    </div>
+    <div class="needs-card louise">
+      <div class="needs-card-label">Louise</div>
+      <div class="needs-card-name">What I need</div>
+      <textarea class="needs-field" id="needsLouise" placeholder="e.g. something to look forward to, adventure, feeling free…"></textarea>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span class="legend-label">Key</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--ryan)"></span>Ryan</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--louise)"></span>Louise</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--gold)"></span>Both of us</span>
+  </div>
+
+  <div class="section-title">Month by month</div>
+  <div class="months-grid" id="monthsGrid"></div>
+
+  <div class="future-section">
+    <div class="section-title">After April 2027</div>
+    <div class="future-card" id="futureCard"
+         ondragover="futureDragOver(event)" ondragleave="futureDragLeave(event)" ondrop="futureDrop(event)">
+      <div class="future-drop-hint">Drop here to plan for after April 2027</div>
+      <ul class="items-list" id="futureList"></ul>
+      <div class="add-form">
+        <div class="add-row1">
+          <div class="icon-picker-wrap">
+            <button class="icon-picker-btn" onclick="togglePicker('future',event)"><span id="fIconDisp">✨</span></button>
+            <div class="icon-grid-pop" id="fIconPop"></div>
+          </div>
+          <input class="add-input" id="futureInput" placeholder="Add something for after April 2027…" onkeydown="if(event.key==='Enter')addFuture()">
+        </div>
+        <div class="add-row2">
+          <div class="who-group">
+            <button class="who-btn ryan" id="fw-ryan" onclick="setFWho('ryan')">Ryan</button>
+            <button class="who-btn louise" id="fw-louise" onclick="setFWho('louise')">Louise</button>
+            <button class="who-btn shared active" id="fw-shared" onclick="setFWho('shared')">Both</button>
+          </div>
+          <label class="cost-toggle"><input type="checkbox" id="fCC" onchange="toggleCost('future')"> Has a cost</label>
+          <div class="cost-wrap" id="fCW"><span class="cost-sym">€</span><input class="cost-input" id="fCA" type="number" placeholder="0" min="0"></div>
+          <button class="add-btn" onclick="addFuture()">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wishlist-section">
+    <div class="section-title">Things we'd like to do</div>
+    <p class="wishlist-intro">Drag any of these into a month above, or into the After April 2027 section. Add your own below.</p>
+    <div class="wishlist-grid" id="wishGrid"></div>
+    <div class="add-wish-form">
+      <div class="add-wish-title">Add something to the list</div>
+      <div class="add-row1">
+        <div class="icon-picker-wrap">
+          <button class="icon-picker-btn" onclick="togglePicker('wish',event)"><span id="wishIconDisp">🌟</span></button>
+          <div class="icon-grid-pop" id="wishIconPop"></div>
+        </div>
+        <input class="add-input" id="wishInput" placeholder="Something we want to do together…" onkeydown="if(event.key==='Enter')addWishItem()">
+        <button class="add-btn" onclick="addWishItem()">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">I put this together for us. It works best as a conversation, not a solo exercise.</div>
+</div>
+
+<div class="sync-bar">
+  <div class="sync-pill" id="syncPill">Saved</div>
+  <div class="sync-pill error" id="errorPill">Could not save. Check connection.</div>
+</div>
+
+<script>
+// ---- CONFIG ----
+const SUPABASE_URL = 'https://nwcrqweompuliqlfwnwb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53Y3Jxd2VvbXB1bGlxbGZ3bndiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjI3MTAsImV4cCI6MjA5MDYzODcxMH0.DJ7tThYwfLyVZ6EXpXDRpgwSzSIXWw-rLcedNiqnMNc';
+const PASSWORD = 'InBrugesFiction';
+const POLL_INTERVAL = 15000; // re-fetch from Supabase every 15 seconds
+
+const MONTH_NAMES = ["April 2026","May 2026","June 2026","July 2026","August 2026","September 2026","October 2026","November 2026","December 2026","January 2027","February 2027","March 2027","April 2027"];
+const ICONS = ["✨","🎯","🏠","✈️","💰","💍","🎉","🎂","🌍","🌊","🏖️","🏔️","🎓","💼","🛠️","📖","🎮","🎵","🍕","☕","🚗","🐶","❤️","🌱","💡","🏦","🗺️","📅","🎁","🤝","🏃","💪","🌟","🎪","🏋️","🎨"];
+
+const DEFAULT_MONTHS = [
+  {n:1,items:[]},{n:2,items:[]},{n:3,items:[]},{n:4,items:[]},{n:5,items:[]},{n:6,items:[]},{n:7,items:[]},
+  {n:8,items:[{text:"I hit €10,000 in savings",who:"ryan",icon:"💰",cost:null}]},
+  {n:9,items:[{text:"We meet with a mortgage adviser",who:"shared",icon:"🏦",cost:null}]},
+  {n:10,items:[]},{n:11,items:[]},{n:12,items:[]},{n:13,items:[]}
+];
+const DEFAULT_WISHLIST = [
+  {id:"w1",icon:"✈️",text:"South-East Asia trip",sub:"Drag to a month or to after April 2027",assigned:false},
+  {id:"w2",icon:"🏠",text:"Buy a house",sub:"Drag to a month or to after April 2027",assigned:false},
+  {id:"w3",icon:"💍",text:"Get engaged or married",sub:"Drag to a month or to after April 2027",assigned:false},
+  {id:"w4",icon:"🛠️",text:"Build GetDocket",sub:"My project, ongoing",assigned:false},
+  {id:"w5",icon:"📖",text:"Write a novel",sub:"My project, ongoing",assigned:false},
+];
+const DEFAULT_FUTURE = [
+  {text:"Mortgage application underway",who:"shared",icon:"🏠",cost:null},
+  {text:"We know where we're living and when",who:"shared",icon:"🗺️",cost:null},
+];
+
+const uiState = { monthWho:{}, monthIcon:{}, futureWho:'shared', futureIcon:'✨', wishIcon:'🌟', dragId:null };
+DEFAULT_MONTHS.forEach(m => { uiState.monthWho[m.n]='shared'; uiState.monthIcon[m.n]='✨'; });
+
+// ---- PASSWORD ----
+function checkPassword() {
+  const val = document.getElementById('gateInput').value;
+  if (val === PASSWORD) {
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('mainContent').style.display = 'block';
+    sessionStorage.setItem('rmf_auth', '1');
+    initApp();
+  } else {
+    const err = document.getElementById('gateError');
+    err.style.display = 'block';
+    document.getElementById('gateInput').value = '';
+  }
+}
+
+if (sessionStorage.getItem('rmf_auth') === '1') {
+  document.getElementById('gate').classList.add('hidden');
+  document.getElementById('mainContent').style.display = 'block';
+  document.addEventListener('DOMContentLoaded', initApp);
+}
+
+// ---- SUPABASE ----
+async function dbGet(key) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/plan_data?key=eq.${key}&select=value`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  const rows = await res.json();
+  if (rows && rows.length > 0) { try { return JSON.parse(rows[0].value); } catch(e) { return null; } }
+  return null;
+}
+
+async function dbSet(key, value) {
+  const body = JSON.stringify({ key, value: JSON.stringify(value) });
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/plan_data`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates'
+    },
+    body
+  });
+  return res.ok;
+}
+
+async function dbGetAll() {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/plan_data?select=key,value`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  const rows = await res.json();
+  const out = {};
+  if (Array.isArray(rows)) rows.forEach(r => { try { out[r.key] = JSON.parse(r.value); } catch(e) {} });
+  return out;
+}
+
+// ---- SYNC UI ----
+let saveTimer = null;
+function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(saveAll, 800); }
+
+async function saveAll() {
+  const data = {
+    needsRyan: document.getElementById('needsRyan').value,
+    needsLouise: document.getElementById('needsLouise').value,
+    months: {}, future: serializeList('futureList'), wishlist: serializeWishlist()
+  };
+  DEFAULT_MONTHS.forEach(m => { data.months[m.n] = serializeList('list-'+m.n); });
+  const ok = await dbSet('plan', data);
+  showPill(ok ? 'syncPill' : 'errorPill');
+}
+
+function showPill(id) {
+  const el = document.getElementById(id);
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+function serializeList(listId) {
+  const items = [];
+  document.querySelectorAll('#'+listId+' .item-row').forEach(row => {
+    const dot = row.querySelector('.item-dot');
+    const who = dot ? (dot.classList.contains('ryan')?'ryan':dot.classList.contains('louise')?'louise':'shared') : 'shared';
+    const icon = row.querySelector('.item-icon')?.textContent || '✨';
+    const text = row.querySelector('.item-text')?.textContent || '';
+    const costEl = row.querySelector('.item-cost-tag');
+    const cost = costEl ? costEl.textContent.replace('€','').trim() : null;
+    if (text) items.push({icon,who,text,cost});
+  });
+  return items;
+}
+
+function serializeWishlist() {
+  const items = [];
+  document.querySelectorAll('#wishGrid .wish-item').forEach(el => {
+    const icon = el.querySelector('.wish-icon')?.textContent || '🌟';
+    const text = el.querySelector('.wish-text')?.textContent || '';
+    const badgeEl = el.querySelector('.wish-badge');
+    const assigned = el.classList.contains('assigned');
+    const assignedTo = badgeEl ? badgeEl.textContent.replace('Added to ','') : null;
+    const subEl = el.querySelector('.wish-sub');
+    const sub = (!assigned && subEl) ? subEl.textContent : 'Drag to a month or to after April 2027';
+    const id = el.dataset.wish;
+    if (text) items.push({id,icon,text,sub,assigned,assignedTo});
+  });
+  return items;
+}
+
+async function confirmReset() {
+  if (confirm('Clear everything and start fresh?')) {
+    await dbSet('plan', null);
+    location.reload();
+  }
+}
+
+// ---- POLLING (live sync) ----
+let lastHash = '';
+async function pollForChanges() {
+  try {
+    const data = await dbGet('plan');
+    const hash = JSON.stringify(data);
+    if (hash !== lastHash && lastHash !== '') {
+      lastHash = hash;
+      applyData(data);
+      showPill('syncPill');
+    } else {
+      lastHash = hash;
+    }
+  } catch(e) {}
+}
+
+// ---- ICON PICKER ----
+function buildPicker(popId, onPick, currentIcon) {
+  const pop = document.getElementById(popId);
+  pop.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'icon-grid';
+  ICONS.forEach(ic => {
+    const b = document.createElement('button');
+    b.className = 'icon-opt'+(ic===currentIcon?' sel':'');
+    b.textContent = ic;
+    b.onclick = e => { e.stopPropagation(); onPick(ic); pop.classList.remove('open'); pop.querySelectorAll('.icon-opt').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); };
+    grid.appendChild(b);
+  });
+  pop.appendChild(grid);
+}
+function togglePicker(key, e) {
+  e.stopPropagation();
+  const popId = key==='future'?'fIconPop':key==='wish'?'wishIconPop':'m'+key+'IconPop';
+  const pop = document.getElementById(popId);
+  const wasOpen = pop.classList.contains('open');
+  document.querySelectorAll('.icon-grid-pop.open').forEach(p=>p.classList.remove('open'));
+  if(!wasOpen) pop.classList.add('open');
+}
+document.addEventListener('click', ()=>document.querySelectorAll('.icon-grid-pop.open').forEach(p=>p.classList.remove('open')));
+
+// ---- COST ----
+function toggleCost(key) {
+  const isF = key==='future';
+  const chk = document.getElementById(isF?'fCC':'cc-'+key);
+  const wrap = document.getElementById(isF?'fCW':'cw-'+key);
+  wrap.classList.toggle('show', chk.checked);
+}
+
+// ---- ITEMS ----
+function removeItem(btn) { btn.closest('.item-row').remove(); scheduleSave(); }
+function makeLi(icon, who, text, cost) {
+  const li = document.createElement('li');
+  li.className = 'item-row';
+  const costHTML = (cost && parseFloat(cost)>0)
+    ? `<span class="item-cost-tag">€${parseFloat(cost).toLocaleString('en-IE',{minimumFractionDigits:0,maximumFractionDigits:2})}</span>` : '';
+  li.innerHTML = `
+    <span class="item-icon">${icon}</span><span class="item-dot ${who}"></span>
+    <div class="item-main"><span class="item-text">${text}</span>${costHTML}</div>
+    <div class="item-actions"><button class="item-delete" onclick="removeItem(this)">×</button></div>`;
+  return li;
+}
+
+// ---- FUTURE ----
+function setFWho(w) { uiState.futureWho=w; ['ryan','louise','shared'].forEach(x=>document.getElementById('fw-'+x).classList.toggle('active',x===w)); }
+function addFuture() {
+  const inp = document.getElementById('futureInput');
+  const txt = inp.value.trim(); if(!txt) return;
+  const chk = document.getElementById('fCC');
+  const cost = chk.checked ? document.getElementById('fCA').value : null;
+  document.getElementById('futureList').appendChild(makeLi(uiState.futureIcon, uiState.futureWho, txt, cost));
+  inp.value=''; document.getElementById('fCA').value=''; chk.checked=false; document.getElementById('fCW').classList.remove('show');
+  scheduleSave();
+}
+function futureDragOver(e) { e.preventDefault(); document.getElementById('futureCard').classList.add('drag-over'); }
+function futureDragLeave(e) { const c=document.getElementById('futureCard'); if(!c.contains(e.relatedTarget)) c.classList.remove('drag-over'); }
+function futureDrop(e) {
+  e.preventDefault(); document.getElementById('futureCard').classList.remove('drag-over');
+  if(!uiState.dragId) return;
+  const wish = getCurrentWishlist().find(x=>x.id===uiState.dragId);
+  if(!wish) return;
+  document.getElementById('futureList').appendChild(makeLi(wish.icon,'shared',wish.text,null));
+  assignWish(wish.id,'After April 2027'); uiState.dragId=null; scheduleSave();
+}
+
+// ---- MONTHS ----
+function setMWho(n,w) { uiState.monthWho[n]=w; ['ryan','louise','shared'].forEach(x=>document.getElementById(`mw-${x}-${n}`).classList.toggle('active',x===w)); }
+function addMonthItem(n) {
+  const inp = document.getElementById('inp-'+n);
+  const txt = inp.value.trim(); if(!txt) return;
+  const chk = document.getElementById('cc-'+n);
+  const cost = chk.checked ? document.getElementById('ca-'+n).value : null;
+  document.getElementById('list-'+n).appendChild(makeLi(uiState.monthIcon[n], uiState.monthWho[n], txt, cost));
+  const card = document.querySelector(`[data-month="${n}"]`);
+  card.classList.add('has-content','open');
+  inp.value=''; document.getElementById('ca-'+n).value=''; chk.checked=false; document.getElementById('cw-'+n).classList.remove('show');
+  scheduleSave();
+}
+function toggleMonth(header) { header.closest('.month-card').classList.toggle('open'); }
+
+function buildMonths(savedData) {
+  const grid = document.getElementById('monthsGrid');
+  grid.innerHTML = '';
+  DEFAULT_MONTHS.forEach(m => {
+    const savedItems = savedData?.months?.[m.n] || m.items;
+    const hasContent = savedItems.length > 0;
+    const card = document.createElement('div');
+    card.className = 'month-card'+(hasContent?' has-content open':'');
+    card.dataset.month = m.n;
+    const name = MONTH_NAMES[m.n-1];
+    const preview = hasContent ? savedItems[0].text+(savedItems.length>1?` +${savedItems.length-1} more`:'') : 'Nothing planned yet';
+    card.innerHTML = `
+      <div class="month-header" onclick="toggleMonth(this)">
+        <div class="month-header-left">
+          <div class="month-badge">${name}</div>
+          <div><div class="month-label">Month ${m.n}</div><div class="month-preview">${preview}</div></div>
+        </div><span class="month-toggle">⌄</span>
+      </div>
+      <div class="month-body">
+        <div class="drop-hint">Drop here to add to ${name}</div>
+        <ul class="items-list" id="list-${m.n}"></ul>
+        <div class="add-form">
+          <div class="add-row1">
+            <div class="icon-picker-wrap">
+              <button class="icon-picker-btn" onclick="togglePicker('m${m.n}',event)"><span id="m${m.n}IconDisp">✨</span></button>
+              <div class="icon-grid-pop" id="m${m.n}IconPop"></div>
+            </div>
+            <input class="add-input" id="inp-${m.n}" placeholder="Add something to ${name}…" onkeydown="if(event.key==='Enter')addMonthItem(${m.n})">
+          </div>
+          <div class="add-row2">
+            <div class="who-group">
+              <button class="who-btn ryan" id="mw-ryan-${m.n}" onclick="setMWho(${m.n},'ryan')">Ryan</button>
+              <button class="who-btn louise" id="mw-louise-${m.n}" onclick="setMWho(${m.n},'louise')">Louise</button>
+              <button class="who-btn shared active" id="mw-shared-${m.n}" onclick="setMWho(${m.n},'shared')">Both</button>
+            </div>
+            <label class="cost-toggle"><input type="checkbox" id="cc-${m.n}" onchange="toggleCost(${m.n})"> Has a cost</label>
+            <div class="cost-wrap" id="cw-${m.n}"><span class="cost-sym">€</span><input class="cost-input" id="ca-${m.n}" type="number" placeholder="0" min="0"></div>
+            <button class="add-btn" onclick="addMonthItem(${m.n})">Add</button>
+          </div>
+        </div>
+      </div>`;
+    card.addEventListener('dragover', e=>{e.preventDefault();card.classList.add('drag-over');});
+    card.addEventListener('dragleave', e=>{if(!card.contains(e.relatedTarget))card.classList.remove('drag-over');});
+    card.addEventListener('drop', e=>{
+      e.preventDefault(); card.classList.remove('drag-over');
+      if(!uiState.dragId) return;
+      const wish = getCurrentWishlist().find(x=>x.id===uiState.dragId);
+      if(!wish) return;
+      document.getElementById('list-'+m.n).appendChild(makeLi(wish.icon,'shared',wish.text,null));
+      card.classList.add('has-content','open');
+      assignWish(wish.id,name); uiState.dragId=null; scheduleSave();
+    });
+    grid.appendChild(card);
+    buildPicker('m'+m.n+'IconPop', ic=>{uiState.monthIcon[m.n]=ic; document.getElementById('m'+m.n+'IconDisp').textContent=ic;},'✨');
+    const list = document.getElementById('list-'+m.n);
+    savedItems.forEach(item=>list.appendChild(makeLi(item.icon,item.who,item.text,item.cost)));
+  });
+  buildPicker('fIconPop', ic=>{uiState.futureIcon=ic; document.getElementById('fIconDisp').textContent=ic;},'✨');
+}
+
+// ---- WISHLIST ----
+function getCurrentWishlist() {
+  const items = [];
+  document.querySelectorAll('#wishGrid .wish-item').forEach(el=>{
+    items.push({id:el.dataset.wish, icon:el.querySelector('.wish-icon')?.textContent||'🌟', text:el.querySelector('.wish-text')?.textContent||'', assigned:el.classList.contains('assigned')});
+  });
+  return items;
+}
+function assignWish(id, where) {
+  const el = document.querySelector(`[data-wish="${id}"]`);
+  if(el){ el.classList.add('assigned'); const s=el.querySelector('.wish-sub'); if(s) s.innerHTML=`<span class="wish-badge">Added to ${where}</span>`; }
+}
+function removeWish(btn) { btn.closest('.wish-item').remove(); scheduleSave(); }
+function makeWishEl(w) {
+  const div = document.createElement('div');
+  div.className = 'wish-item'+(w.assigned?' assigned':'');
+  div.dataset.wish = w.id;
+  div.draggable = true;
+  const subHTML = w.assigned && w.assignedTo ? `<span class="wish-badge">Added to ${w.assignedTo}</span>` : `<span class="wish-sub">${w.sub||'Drag to a month or to after April 2027'}</span>`;
+  div.innerHTML = `<span class="wish-icon">${w.icon}</span><div style="flex:1"><div class="wish-text">${w.text}</div>${subHTML}</div><button class="wish-delete" onclick="removeWish(this)">×</button>`;
+  div.addEventListener('dragstart', e=>{ uiState.dragId=w.id; div.classList.add('dragging'); e.dataTransfer.effectAllowed='copy'; });
+  div.addEventListener('dragend', ()=>div.classList.remove('dragging'));
+  return div;
+}
+function addWishItem() {
+  const inp = document.getElementById('wishInput');
+  const txt = inp.value.trim(); if(!txt) return;
+  const id = 'w_'+Date.now();
+  document.getElementById('wishGrid').appendChild(makeWishEl({id,icon:uiState.wishIcon,text:txt,sub:'Drag to a month or to after April 2027',assigned:false}));
+  inp.value=''; scheduleSave();
+}
+function buildWishlist(savedItems) {
+  const grid = document.getElementById('wishGrid');
+  grid.innerHTML = '';
+  (savedItems||DEFAULT_WISHLIST).forEach(w=>grid.appendChild(makeWishEl(w)));
+  buildPicker('wishIconPop', ic=>{uiState.wishIcon=ic; document.getElementById('wishIconDisp').textContent=ic;},'🌟');
+}
+function buildFutureList(savedItems) {
+  const list = document.getElementById('futureList');
+  list.innerHTML = '';
+  (savedItems||DEFAULT_FUTURE).forEach(item=>list.appendChild(makeLi(item.icon,item.who,item.text,item.cost)));
+}
+
+// ---- APPLY REMOTE DATA ----
+function applyData(data) {
+  if (!data) return;
+  buildMonths(data);
+  buildFutureList(data.future);
+  buildWishlist(data.wishlist);
+  if(data.needsRyan) document.getElementById('needsRyan').value = data.needsRyan;
+  if(data.needsLouise) document.getElementById('needsLouise').value = data.needsLouise;
+}
+
+// ---- INIT ----
+async function initApp() {
+  const data = await dbGet('plan');
+  lastHash = JSON.stringify(data);
+  applyData(data) || (buildMonths(null), buildFutureList(null), buildWishlist(null));
+  document.getElementById('needsRyan').addEventListener('input', scheduleSave);
+  document.getElementById('needsLouise').addEventListener('input', scheduleSave);
+  setInterval(pollForChanges, POLL_INTERVAL);
+}
+</script>
+</body>
+</html>
