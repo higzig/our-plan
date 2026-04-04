@@ -167,16 +167,24 @@
   .month-remove-btn{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:12px;padding:4px 6px;border-radius:4px;margin-left:4px;transition:color 0.15s;line-height:1;opacity:0.5;}
   .month-remove-btn:hover{color:var(--louise);opacity:1;}
 
+  /* COLON BUTTON on items and wish cards */
+  .item-colon{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:12px;font-weight:700;line-height:1;padding:2px 5px;border-radius:4px;transition:all 0.15s;letter-spacing:-1px;flex-shrink:0;}
+  .item-colon:hover{background:var(--ryan-light);color:var(--ryan);}
+
   /* CONTEXT MENU */
-  #ctxMenu{display:none;position:fixed;z-index:9998;background:var(--warm-white);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 32px rgba(28,26,23,0.18);min-width:200px;overflow:hidden;}
-  #ctxMenu.open{display:block;}
-  .ctx-header{padding:8px 14px 6px;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);border-bottom:1px solid var(--border);}
-  .ctx-item{display:flex;align-items:center;gap:10px;padding:9px 14px;font-size:13px;color:var(--ink-light);cursor:pointer;transition:background 0.1s;}
+  #ctxMenu{display:none;position:fixed;z-index:9998;background:var(--warm-white);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 32px rgba(28,26,23,0.18);width:260px;max-height:80vh;overflow:hidden;flex-direction:column;}
+  #ctxMenu.open{display:flex;}
+  .ctx-scroll{overflow-y:auto;flex:1;}
+  .ctx-header{padding:8px 14px 6px;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);border-bottom:1px solid var(--border);background:var(--warm-white);position:sticky;top:0;}
+  .ctx-item{display:flex;align-items:center;gap:10px;padding:8px 14px;font-size:13px;color:var(--ink-light);cursor:pointer;transition:background 0.1s;}
   .ctx-item:hover{background:var(--cream);color:var(--ink);}
   .ctx-item .ctx-badge{font-size:10px;padding:1px 7px;border-radius:12px;background:var(--ryan-light);color:var(--ryan);font-weight:500;margin-left:auto;white-space:nowrap;}
+  .ctx-item .ctx-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0;}
   .ctx-item.ctx-delete{color:var(--louise);}
   .ctx-item.ctx-delete:hover{background:var(--louise-light);}
   .ctx-divider{height:1px;background:var(--border);margin:3px 0;}
+  /* Category pill on items */
+  .item-cat{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:500;padding:1px 7px;border-radius:12px;margin-left:6px;vertical-align:middle;}
   .future-section{margin-bottom:48px;}
   .future-card{background:var(--warm-white);border:1px solid var(--border);border-radius:12px;padding:24px;box-shadow:var(--shadow);transition:border-color 0.2s,box-shadow 0.2s;}
   .future-card.drag-over{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-light);}
@@ -195,9 +203,13 @@
   .wish-text{font-size:14px;font-weight:500;color:var(--ink);}
   .wish-sub{font-size:11px;color:var(--ink-faint);font-style:italic;margin-top:2px;}
   .wish-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;letter-spacing:0.05em;background:var(--gold-light);color:#8a6a1a;margin-top:4px;display:inline-block;}
-  .wish-delete{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:15px;padding:2px 4px;border-radius:4px;margin-left:auto;opacity:0;transition:opacity 0.15s,color 0.15s;flex-shrink:0;}
+  .wish-delete{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:15px;padding:2px 4px;border-radius:4px;margin-left:2px;opacity:0;transition:opacity 0.15s,color 0.15s;flex-shrink:0;}
   .wish-item:hover .wish-delete{opacity:1;}
   .wish-delete:hover{color:var(--louise);}
+  .wish-colon{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:12px;font-weight:700;line-height:1;padding:3px 6px;border-radius:4px;transition:all 0.15s;letter-spacing:-1px;flex-shrink:0;margin-left:4px;opacity:0;}
+  .wish-item:hover .wish-colon{opacity:1;}
+  .wish-colon:hover{background:var(--ryan-light);color:var(--ryan);}
+  @media(max-width:768px){.wish-delete,.wish-colon{opacity:1;}}
   .add-wish-form{background:var(--warm-white);border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:var(--shadow);}
   .add-wish-title{font-size:12px;font-weight:500;color:var(--ink-faint);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;}
 
@@ -306,7 +318,7 @@
 
   <div class="wishlist-section">
     <div class="section-title">Things we'd like to do</div>
-    <p class="wishlist-intro">Drag any of these into a month above, or into the After April 2027 section. Add your own below.</p>
+    <p class="wishlist-intro">Drag into a month or use the ∶ button to assign. Add your own below.</p>
     <div class="wishlist-grid" id="wishGrid"></div>
     <div class="add-wish-form">
       <div class="add-wish-title">Add something to the list</div>
@@ -322,10 +334,9 @@
 
 <!-- CONTEXT MENU -->
 <div id="ctxMenu">
-  <div class="ctx-header">Move to month</div>
-  <div id="ctxMonthList"></div>
+  <div class="ctx-scroll" id="ctxScroll"></div>
   <div class="ctx-divider"></div>
-  <div class="ctx-item ctx-delete" onclick="ctxDelete()">🗑 Delete item</div>
+  <div class="ctx-item ctx-delete" onclick="ctxDelete()"><span class="ctx-icon">🗑</span> Delete item</div>
 </div>
 
 <!-- EDIT MODAL -->
@@ -578,7 +589,8 @@ function serializeList(listId) {
     const icon = row.dataset.icon || row.querySelector('.item-icon')?.textContent.trim() || '✨';
     const text = row.querySelector('.item-text')?.textContent.trim()  || '';
     const cost = row.dataset.cost || null;
-    if (text) items.push({icon,who,text,cost:cost||null});
+    const cat  = row.dataset.cat || '';
+    if (text) items.push({icon,who,text,cost:cost||null,cat});
   });
   return items;
 }
@@ -587,14 +599,18 @@ function serializeWishlist() {
   const items = [];
   document.querySelectorAll('#wishGrid .wish-item').forEach(el => {
     const icon       = el.querySelector('.wish-icon')?.textContent.trim() || '🌟';
-    const text       = el.querySelector('.wish-text')?.textContent.trim() || '';
+    const rawText    = el.querySelector('.wish-text')?.textContent.trim() || '';
+    // Strip any category pill text from wish-text
+    const catPill    = el.querySelector('.wish-text .item-cat');
+    const text       = catPill ? rawText.replace(catPill.textContent,'').trim() : rawText;
     const badgeEl    = el.querySelector('.wish-badge');
     const assigned   = el.classList.contains('assigned');
     const assignedTo = badgeEl ? badgeEl.textContent.replace('Added to ','') : null;
     const subEl      = el.querySelector('.wish-sub');
-    const sub        = (!assigned && subEl) ? subEl.textContent : 'Drag to a month or to after April 2027';
+    const sub        = (!assigned && subEl) ? subEl.textContent : 'Drag to a month or use ∶';
     const id         = el.dataset.wish;
-    if (text) items.push({id,icon,text,sub,assigned,assignedTo});
+    const cat        = el.dataset.cat || '';
+    if (text) items.push({id,icon,text,sub,assigned,assignedTo,cat});
   });
   return items;
 }
@@ -633,32 +649,46 @@ function toggleCost(key) {
 ============================================================ */
 function removeItem(btn) { btn.closest('.item-row').remove(); scheduleSave(); }
 
-function makeLi(icon, who, text, cost) {
+function catPillHTML(cat) {
+  if (!cat) return '';
+  const c = CATEGORIES.find(x => x.name === cat);
+  if (!c) return '';
+  return `<span class="item-cat" style="background:${c.bg};color:${c.fg}">${c.icon} ${c.name}</span>`;
+}
+
+function makeLi(icon, who, text, cost, cat) {
   const li = document.createElement('li');
   li.className = 'item-row';
   li.draggable = true;
   li.dataset.icon = icon;
   li.dataset.who  = who;
   li.dataset.cost = cost || '';
+  li.dataset.cat  = cat  || '';
   const costHTML = (cost && parseFloat(cost)>0)
     ? `<span class="item-cost-tag">€${parseFloat(cost).toLocaleString('en-IE',{minimumFractionDigits:0,maximumFractionDigits:2})}</span>` : '';
   li.innerHTML = `
     <span class="item-drag-handle" title="Drag to reorder">⠿</span>
     <span class="item-icon">${icon}</span>
     <span class="item-dot ${who}"></span>
-    <div class="item-main"><span class="item-text">${text}</span>${costHTML}</div>
+    <div class="item-main"><span class="item-text">${text}</span>${catPillHTML(cat)}${costHTML}</div>
     <div class="item-actions">
+      <button class="item-colon" title="Options">∶</button>
       <button class="item-edit" onclick="openEditModal(this)" title="Edit">✎</button>
       <button class="item-delete" onclick="removeItem(this)" title="Delete">×</button>
     </div>`;
-  // Desktop drag-to-reorder
+  // Colon button opens context menu
+  li.querySelector('.item-colon').addEventListener('click', e => { e.stopPropagation(); openCtxMenu(e, li, 'item'); });
+  // Desktop drag-to-reorder (only from handle)
   li.addEventListener('dragstart', e => {
-    if (e.target.classList.contains('item-drag-handle') || e.target === li) {
+    // If this is a reorder drag from the handle
+    if (e.target.classList.contains('item-drag-handle')) {
       ui.reorderDragEl = li;
+      ui.dragId = null; // clear wish drag
       li.classList.add('dragging-item');
       e.dataTransfer.effectAllowed = 'move';
-      e.stopPropagation(); // don't trigger wish drag
+      e.stopPropagation();
     } else {
+      // Prevent other drags on item rows
       e.preventDefault();
     }
   });
@@ -692,13 +722,12 @@ function makeLi(icon, who, text, cost) {
   // Touch drag-to-reorder
   setupTouchDrag(li);
   // Right-click context menu
-  li.addEventListener('contextmenu', e => openCtxMenu(e, li));
+  li.addEventListener('contextmenu', e => openCtxMenu(e, li, 'item'));
   // Long press for mobile
   let longPressTimer;
   li.addEventListener('touchstart', e => {
-    // Don't trigger if on drag handle or buttons
     if (e.target.closest('.item-drag-handle,.item-actions')) return;
-    longPressTimer = setTimeout(() => { openCtxMenu(e, li); }, 600);
+    longPressTimer = setTimeout(() => { openCtxMenu(e, li, 'item'); }, 600);
   }, {passive:true});
   li.addEventListener('touchend',    () => clearTimeout(longPressTimer));
   li.addEventListener('touchmove',   () => clearTimeout(longPressTimer));
@@ -835,88 +864,239 @@ document.getElementById('editModal').addEventListener('click', e => {
 });
 
 /* ============================================================
-   CONTEXT MENU — long press / right click on items
+   CATEGORIES
+============================================================ */
+const CATEGORIES = [
+  {name:'Holiday',       icon:'✈️', bg:'#E8F0FB', fg:'#2a5a9c'},
+  {name:'Weekend away',  icon:'🚗', bg:'#EDF6EE', fg:'#2d6e35'},
+  {name:'Home',          icon:'🏠', bg:'#FDF0E8', fg:'#9c4a1a'},
+  {name:'Finance',       icon:'💰', bg:'#FDF7E4', fg:'#7a5c0a'},
+  {name:'Saving goal',   icon:'🏦', bg:'#E8F5F0', fg:'#1a6e54'},
+  {name:'Health',        icon:'💪', bg:'#FCE8F0', fg:'#8c1a4a'},
+  {name:'Fitness',       icon:'🏃', bg:'#EDE8FC', fg:'#4a2a9c'},
+  {name:'Social',        icon:'🎉', bg:'#FFF0E0', fg:'#8c4e00'},
+  {name:'Date night',    icon:'❤️', bg:'#FCE8E8', fg:'#8c1a1a'},
+  {name:'Family',        icon:'🤝', bg:'#F0F8FF', fg:'#1a4a7a'},
+  {name:'Career',        icon:'💼', bg:'#F0F0F8', fg:'#2a2a7a'},
+  {name:'Learning',      icon:'📖', bg:'#FFF8E8', fg:'#7a5000'},
+  {name:'Project',       icon:'🛠️', bg:'#F4F0EC', fg:'#5c3a00'},
+  {name:'Creative',      icon:'🎨', bg:'#FFF0F8', fg:'#7a0060'},
+  {name:'Music',         icon:'🎵', bg:'#F8F0FF', fg:'#5a0080'},
+  {name:'Gaming',        icon:'🎮', bg:'#E8F0FF', fg:'#1a3a8c'},
+  {name:'Food & Drink',  icon:'🍕', bg:'#FFF0E8', fg:'#8c3000'},
+  {name:'Nature',        icon:'🌱', bg:'#EDF8ED', fg:'#1a6a1a'},
+  {name:'Adventure',     icon:'🏔️', bg:'#E8F4F8', fg:'#0a4a5a'},
+  {name:'Beach',         icon:'🏖️', bg:'#FFF8E0', fg:'#7a5500'},
+  {name:'Big milestone', icon:'🎯', bg:'#F8F0E8', fg:'#7a3a00'},
+  {name:'Celebration',   icon:'🎂', bg:'#FFF0F4', fg:'#8c005a'},
+  {name:'Gift',          icon:'🎁', bg:'#F4F0FF', fg:'#5a1a8c'},
+  {name:'Wedding',       icon:'💍', bg:'#FFF8F8', fg:'#8c1a1a'},
+  {name:'Moving',        icon:'🗺️', bg:'#F0F8FC', fg:'#0a4a6a'},
+  {name:'Pet',           icon:'🐶', bg:'#FFF4E8', fg:'#7a3a00'},
+  {name:'Idea',          icon:'💡', bg:'#FFFFF0', fg:'#6a6a00'},
+  {name:'Event',         icon:'📅', bg:'#F0F4FF', fg:'#1a2a8c'},
+  {name:'Wishlist',      icon:'🌟', bg:'#FFFFF4', fg:'#7a6a00'},
+];
+
+/* ============================================================
+   CONTEXT MENU — colon button / long press / right click
 ============================================================ */
 const ctxMenu = document.getElementById('ctxMenu');
-const ctx = { targetLi: null };
+const ctx = { target: null, type: null };
+let ctxJustOpened = false;
 
-function openCtxMenu(e, li) {
+function openCtxMenu(e, el, type) {
   e.preventDefault();
-  ctx.targetLi = li;
-  // Build month list
-  const list = document.getElementById('ctxMonthList');
-  list.innerHTML = '';
+  e.stopPropagation();
+  ctx.target = el;
+  ctx.type   = type;
+  ctxJustOpened = true;
+
+  const scroll = document.getElementById('ctxScroll');
+  scroll.innerHTML = '';
+
+  // ── MOVE TO MONTH section ──
+  const mHead = document.createElement('div');
+  mHead.className = 'ctx-header';
+  mHead.textContent = 'Move to month';
+  scroll.appendChild(mHead);
+
   for (let n = 1; n <= monthCount; n++) {
-    // Check if this li is already in this month
     const monthList = document.getElementById('list-'+n);
-    const already = monthList && monthList.contains(li);
+    const already = type === 'item' && monthList && monthList.contains(el);
     const div = document.createElement('div');
     div.className = 'ctx-item';
-    div.innerHTML = `<span>${monthName(n)}</span>${already?'<span class="ctx-badge">current</span>':''}`;
-    if (!already) {
-      div.addEventListener('click', () => ctxMoveToMonth(n));
-    } else {
-      div.style.opacity = '0.5';
-      div.style.cursor = 'default';
-    }
-    list.appendChild(div);
+    div.innerHTML = `<span class="ctx-icon">📅</span><span>${monthName(n)}</span>${already?'<span class="ctx-badge">here</span>':''}`;
+    if (already) { div.style.opacity='0.45'; div.style.cursor='default'; }
+    else div.addEventListener('click', () => ctxMoveToMonth(n));
+    scroll.appendChild(div);
   }
+  // Also "After April 2027"
+  const futDiv = document.createElement('div');
+  futDiv.className = 'ctx-item';
+  futDiv.innerHTML = `<span class="ctx-icon">🔮</span><span>After April 2027</span>`;
+  futDiv.addEventListener('click', () => ctxMoveToFuture());
+  scroll.appendChild(futDiv);
+
+  // ── CATEGORY section ──
+  const cHead = document.createElement('div');
+  cHead.className = 'ctx-header';
+  cHead.textContent = 'Set category';
+  scroll.appendChild(cHead);
+
+  const currentCat = el.dataset.cat || '';
+  const clearDiv = document.createElement('div');
+  clearDiv.className = 'ctx-item';
+  clearDiv.innerHTML = `<span class="ctx-icon">✕</span><span>No category</span>${!currentCat?'<span class="ctx-badge">current</span>':''}`;
+  clearDiv.addEventListener('click', () => ctxSetCategory(''));
+  scroll.appendChild(clearDiv);
+
+  CATEGORIES.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'ctx-item';
+    const active = currentCat === c.name;
+    div.innerHTML = `<span class="ctx-icon">${c.icon}</span><span>${c.name}</span>${active?'<span class="ctx-badge">current</span>':''}`;
+    if (active) div.style.fontWeight = '500';
+    div.addEventListener('click', () => ctxSetCategory(c.name));
+    scroll.appendChild(div);
+  });
+
   // Position
   const x = e.clientX || (e.touches?.[0]?.clientX) || 100;
   const y = e.clientY || (e.touches?.[0]?.clientY) || 100;
-  const menuW = 220, menuH = Math.min(monthCount * 40 + 80, 400);
+  const menuW = 264, menuH = 420;
   ctxMenu.style.left = Math.min(x, window.innerWidth  - menuW - 10) + 'px';
-  ctxMenu.style.top  = Math.min(y + window.scrollY, window.scrollY + window.innerHeight - menuH - 10) + 'px';
+  ctxMenu.style.top  = Math.min(y + window.scrollY, window.scrollY + window.innerHeight - menuH - 20) + 'px';
   ctxMenu.classList.add('open');
+  // Reset flag after a tick so the global listener doesn't close it immediately
+  requestAnimationFrame(() => { ctxJustOpened = false; });
 }
 
 function ctxMoveToMonth(n) {
-  const li = ctx.targetLi; if (!li) return;
-  // Make sure month is visible — switch year if needed
+  const el = ctx.target; if (!el) return;
+  closeCtxMenu();
   const targetYear = yearOfMonth(n);
-  if (targetYear !== activeYear) {
-    switchYear(targetYear);
-    // After rebuild we need to re-add — so serialize and defer
-    const item = {
-      icon: li.dataset.icon || '✨',
-      who:  li.dataset.who  || 'shared',
-      text: li.querySelector('.item-text')?.textContent.trim() || '',
-      cost: li.dataset.cost || null
-    };
-    li.remove();
-    setTimeout(() => {
-      const targetList = document.getElementById('list-'+n);
-      if (targetList) {
-        targetList.appendChild(makeLi(item.icon, item.who, item.text, item.cost));
-        document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open');
-        scheduleSave();
-      }
-    }, 50);
-  } else {
-    const targetList = document.getElementById('list-'+n);
-    if (targetList) {
-      li.remove();
-      targetList.appendChild(li);
+
+  if (ctx.type === 'wish') {
+    // Extract clean text (strip cat pill child text from wish-text)
+    const wishTextEl = el.querySelector('.wish-text');
+    const catPillEl  = wishTextEl?.querySelector('.item-cat');
+    const cleanText  = catPillEl
+      ? (wishTextEl.textContent||'').replace(catPillEl.textContent,'').trim()
+      : (wishTextEl?.textContent.trim()||'');
+    const icon = el.querySelector('.wish-icon')?.textContent.trim() || '🌟';
+    const cat  = el.dataset.cat || '';
+
+    const doAssign = () => {
+      const list = document.getElementById('list-'+n);
+      if (!list) return;
+      list.appendChild(makeLi(icon, 'shared', cleanText, null, cat));
       document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open');
+      // Update the wish badge — find the sub/badge container (second div inside the flex child)
+      const subContainer = el.querySelector('[data-sub-container]') || el.querySelector('div > div:last-child') || el.querySelector('.wish-sub')?.parentElement;
+      // Simpler: just replace any .wish-sub or .wish-badge inside the item
+      const existingSub   = el.querySelector('.wish-sub');
+      const existingBadge = el.querySelector('.wish-badge');
+      const badgeHTML = `<span class="wish-badge">Added to ${monthName(n)}</span>`;
+      if (existingSub)        existingSub.outerHTML   = badgeHTML;
+      else if (existingBadge) existingBadge.outerHTML = badgeHTML;
+      el.classList.add('assigned');
       scheduleSave();
+    };
+
+    if (targetYear !== activeYear) { switchYear(targetYear); setTimeout(doAssign, 60); }
+    else doAssign();
+
+  } else {
+    // Move item row
+    const item = {
+      icon: el.dataset.icon||'✨', who: el.dataset.who||'shared',
+      text: el.querySelector('.item-text')?.textContent.trim()||'',
+      cost: el.dataset.cost||null, cat: el.dataset.cat||''
+    };
+    el.remove();
+    const doMove = () => {
+      const list = document.getElementById('list-'+n);
+      if (list) { list.appendChild(makeLi(item.icon,item.who,item.text,item.cost,item.cat)); document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open'); scheduleSave(); }
+    };
+    if (targetYear !== activeYear) { switchYear(targetYear); setTimeout(doMove, 60); }
+    else doMove();
+  }
+}
+
+function ctxMoveToFuture() {
+  const el = ctx.target; if (!el) return;
+  closeCtxMenu();
+  if (ctx.type === 'wish') {
+    const wishTextEl = el.querySelector('.wish-text');
+    const catPillEl  = wishTextEl?.querySelector('.item-cat');
+    const cleanText  = catPillEl
+      ? (wishTextEl.textContent||'').replace(catPillEl.textContent,'').trim()
+      : (wishTextEl?.textContent.trim()||'');
+    const icon = el.querySelector('.wish-icon')?.textContent.trim()||'🌟';
+    document.getElementById('futureList').appendChild(makeLi(icon,'shared',cleanText,null,el.dataset.cat||''));
+    const existingSub   = el.querySelector('.wish-sub');
+    const existingBadge = el.querySelector('.wish-badge');
+    const badgeHTML = `<span class="wish-badge">Added to After April 2027</span>`;
+    if (existingSub)        existingSub.outerHTML   = badgeHTML;
+    else if (existingBadge) existingBadge.outerHTML = badgeHTML;
+    el.classList.add('assigned');
+  } else {
+    const item = { icon:el.dataset.icon||'✨', who:el.dataset.who||'shared', text:el.querySelector('.item-text')?.textContent.trim()||'', cost:el.dataset.cost||null, cat:el.dataset.cat||'' };
+    el.remove();
+    document.getElementById('futureList').appendChild(makeLi(item.icon,item.who,item.text,item.cost,item.cat));
+  }
+  scheduleSave();
+}
+
+function ctxSetCategory(catName) {
+  const el = ctx.target; if (!el) return;
+  closeCtxMenu();
+  el.dataset.cat = catName;
+  const c = catName ? CATEGORIES.find(x=>x.name===catName) : null;
+
+  if (ctx.type === 'item') {
+    // Update icon
+    if (c) el.querySelector('.item-icon').textContent = c.icon;
+    el.dataset.icon = c ? c.icon : (el.dataset.icon || '✨');
+    // Update/remove cat pill
+    const old = el.querySelector('.item-cat'); if(old) old.remove();
+    if (c) {
+      const pill = document.createElement('span');
+      pill.className = 'item-cat';
+      pill.style.cssText = `background:${c.bg};color:${c.fg}`;
+      pill.textContent = `${c.icon} ${c.name}`;
+      el.querySelector('.item-text').insertAdjacentElement('afterend', pill);
+    }
+  } else {
+    // Wishlist item
+    if (c) el.querySelector('.wish-icon').textContent = c.icon;
+    const old = el.querySelector('.item-cat'); if(old) old.remove();
+    if (c) {
+      const pill = document.createElement('span');
+      pill.className = 'item-cat';
+      pill.style.cssText = `background:${c.bg};color:${c.fg}`;
+      pill.textContent = `${c.icon} ${c.name}`;
+      el.querySelector('.wish-text').appendChild(pill);
     }
   }
-  closeCtxMenu();
+  scheduleSave();
 }
 
 function ctxDelete() {
-  if (ctx.targetLi) { ctx.targetLi.remove(); scheduleSave(); }
+  const el = ctx.target; if (!el) return;
+  el.remove();
   closeCtxMenu();
+  scheduleSave();
 }
 
 function closeCtxMenu() {
   ctxMenu.classList.remove('open');
-  ctx.targetLi = null;
+  ctx.target = null; ctx.type = null;
 }
 
-document.addEventListener('click',       e => { if (!ctxMenu.contains(e.target)) closeCtxMenu(); });
-document.addEventListener('contextmenu', e => { if (!ctxMenu.contains(e.target)) closeCtxMenu(); });
-document.addEventListener('keydown',     e => { if (e.key === 'Escape') closeCtxMenu(); });
+document.addEventListener('click',   e => { if (ctxJustOpened) return; if (!ctxMenu.contains(e.target)) closeCtxMenu(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeCtxMenu(); } });
 
 /* ============================================================
    FUTURE
@@ -937,13 +1117,14 @@ function addFuture() {
   scheduleSave();
 }
 
-function futureDragOver(e)  { e.preventDefault(); document.getElementById('futureCard').classList.add('drag-over'); }
+function futureDragOver(e)  { if(!ui.dragId||ui.reorderDragEl) return; e.preventDefault(); document.getElementById('futureCard').classList.add('drag-over'); }
 function futureDragLeave(e) { const c=document.getElementById('futureCard'); if(!c.contains(e.relatedTarget)) c.classList.remove('drag-over'); }
 function futureDrop(e) {
-  e.preventDefault(); document.getElementById('futureCard').classList.remove('drag-over');
-  if(!ui.dragId) return;
+  document.getElementById('futureCard').classList.remove('drag-over');
+  if(!ui.dragId||ui.reorderDragEl) return;
+  e.preventDefault();
   const wish = getWishById(ui.dragId); if(!wish) return;
-  document.getElementById('futureList').appendChild(makeLi(wish.icon,'shared',wish.text,null));
+  document.getElementById('futureList').appendChild(makeLi(wish.icon,'shared',wish.text,null,wish.cat||''));
   assignWish(ui.dragId,'After April 2027');
   ui.dragId=null; scheduleSave();
 }
@@ -1104,25 +1285,29 @@ function buildMonthCard(grid, n, savedItems) {
     });
   });
 
-  card.addEventListener('dragover',  e => {
+  card.addEventListener('dragover', e => {
+    // Allow if it's a wish drag (dragId set) but not an internal reorder
     if (ui.reorderDragEl) return;
-    e.preventDefault(); card.classList.add('drag-over');
+    if (!ui.dragId) return;
+    e.preventDefault();
+    card.classList.add('drag-over');
   });
   card.addEventListener('dragleave', e => { if(!card.contains(e.relatedTarget)) card.classList.remove('drag-over'); });
   card.addEventListener('drop', e => {
-    e.preventDefault(); card.classList.remove('drag-over');
-    if(ui.reorderDragEl) return;
-    if(!ui.dragId) return;
-    const wish = getWishById(ui.dragId); if(!wish) return;
-    document.getElementById('list-'+n).appendChild(makeLi(wish.icon,'shared',wish.text,null));
+    card.classList.remove('drag-over');
+    if (ui.reorderDragEl) return;
+    if (!ui.dragId) return;
+    e.preventDefault();
+    const wish = getWishById(ui.dragId); if (!wish) return;
+    document.getElementById('list-'+n).appendChild(makeLi(wish.icon,'shared',wish.text,null,wish.cat||''));
     card.classList.add('has-content','open');
     assignWish(ui.dragId, name);
-    ui.dragId=null; scheduleSave();
+    ui.dragId = null; scheduleSave();
   });
 
   grid.appendChild(card);
   const list = document.getElementById('list-'+n);
-  savedItems.forEach(item => list.appendChild(makeLi(item.icon,item.who,item.text,item.cost)));
+  savedItems.forEach(item => list.appendChild(makeLi(item.icon,item.who,item.text,item.cost,item.cat||'')));
 }
 
 function removeThisMonth(e, n) {
@@ -1156,12 +1341,23 @@ function getDefaultItems(n) {
 function getWishById(id) {
   const el = document.querySelector(`[data-wish="${id}"]`);
   if (!el) return null;
-  return { id, icon: el.querySelector('.wish-icon')?.textContent.trim()||'🌟', text: el.querySelector('.wish-text')?.textContent.trim()||'' };
+  const wishTextEl = el.querySelector('.wish-text');
+  const catPill = wishTextEl?.querySelector('.item-cat');
+  const text = catPill
+    ? (wishTextEl.textContent||'').replace(catPill.textContent,'').trim()
+    : (wishTextEl?.textContent.trim()||'');
+  return { id, icon: el.querySelector('.wish-icon')?.textContent.trim()||'🌟', text, cat: el.dataset.cat||'' };
 }
 
 function assignWish(id, where) {
   const el = document.querySelector(`[data-wish="${id}"]`);
-  if (el) { el.classList.add('assigned'); const s=el.querySelector('.wish-sub'); if(s) s.innerHTML=`<span class="wish-badge">Added to ${where}</span>`; }
+  if (!el) return;
+  el.classList.add('assigned');
+  const badgeHTML = `<span class="wish-badge">Added to ${where}</span>`;
+  const existingSub   = el.querySelector('.wish-sub');
+  const existingBadge = el.querySelector('.wish-badge');
+  if (existingSub)        existingSub.outerHTML   = badgeHTML;
+  else if (existingBadge) existingBadge.outerHTML = badgeHTML;
 }
 
 function removeWish(btn) { btn.closest('.wish-item').remove(); scheduleSave(); }
@@ -1170,20 +1366,46 @@ function makeWishEl(w) {
   const div = document.createElement('div');
   div.className = 'wish-item'+(w.assigned?' assigned':'');
   div.dataset.wish = w.id;
+  div.dataset.cat  = w.cat || '';
   div.draggable = true;
   const subHTML = (w.assigned && w.assignedTo)
     ? `<span class="wish-badge">Added to ${w.assignedTo}</span>`
-    : `<span class="wish-sub">${w.sub||'Drag to a month or to after April 2027'}</span>`;
-  div.innerHTML = `<span class="wish-icon">${w.icon}</span><div style="flex:1"><div class="wish-text">${w.text}</div>${subHTML}</div><button class="wish-delete" onclick="removeWish(this)">×</button>`;
-  div.addEventListener('dragstart', e => { ui.dragId=w.id; div.classList.add('dragging'); e.dataTransfer.effectAllowed='copy'; });
-  div.addEventListener('dragend',   ()  => div.classList.remove('dragging'));
+    : `<span class="wish-sub">${w.sub||'Drag to a month or use ∶'}</span>`;
+  const catBadge = w.cat ? (() => { const c=CATEGORIES.find(x=>x.name===w.cat); return c?`<span class="item-cat" style="background:${c.bg};color:${c.fg}">${c.icon} ${c.name}</span>`:''; })() : '';
+  div.innerHTML = `
+    <span class="wish-icon">${w.icon}</span>
+    <div style="flex:1;min-width:0">
+      <div class="wish-text">${w.text}${catBadge}</div>
+      <div>${subHTML}</div>
+    </div>
+    <button class="wish-colon" title="Options">∶</button>
+    <button class="wish-delete" onclick="removeWish(this)">×</button>`;
+  div.querySelector('.wish-colon').addEventListener('click', e => { e.stopPropagation(); openCtxMenu(e, div, 'wish'); });
+  div.addEventListener('dragstart', e => {
+    if (e.target.closest('.wish-colon,.wish-delete')) { e.preventDefault(); return; }
+    ui.dragId = w.id;
+    ui.reorderDragEl = null; // not a reorder
+    div.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'copy';
+  });
+  div.addEventListener('dragend', () => div.classList.remove('dragging'));
+  // Long press on mobile
+  let lpt;
+  div.addEventListener('touchstart', e => {
+    if (e.target.closest('.wish-colon,.wish-delete')) return;
+    lpt = setTimeout(() => openCtxMenu(e, div, 'wish'), 600);
+  }, {passive:true});
+  div.addEventListener('touchend',    () => clearTimeout(lpt));
+  div.addEventListener('touchmove',   () => clearTimeout(lpt));
+  div.addEventListener('touchcancel', () => clearTimeout(lpt));
+  div.addEventListener('contextmenu', e => { e.preventDefault(); openCtxMenu(e, div, 'wish'); });
   return div;
 }
 
 function addWishItem() {
   const inp = document.getElementById('wishInput');
   const txt = inp.value.trim(); if(!txt) return;
-  const w = {id:'w_'+Date.now(), icon:ui.wishIcon, text:txt, sub:'Drag to a month or to after April 2027', assigned:false, assignedTo:null};
+  const w = {id:'w_'+Date.now(), icon:ui.wishIcon, text:txt, sub:'Drag to a month or use ∶', assigned:false, assignedTo:null, cat:''};
   document.getElementById('wishGrid').appendChild(makeWishEl(w));
   inp.value=''; scheduleSave();
 }
@@ -1197,7 +1419,7 @@ function buildWishlist(savedItems) {
 function buildFutureList(savedItems) {
   const list = document.getElementById('futureList');
   list.innerHTML = '';
-  (savedItems||DEFAULT_FUTURE).forEach(item => list.appendChild(makeLi(item.icon,item.who,item.text,item.cost)));
+  (savedItems||DEFAULT_FUTURE).forEach(item => list.appendChild(makeLi(item.icon,item.who,item.text,item.cost,item.cat||'')));
 }
 
 /* ============================================================
