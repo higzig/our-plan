@@ -87,10 +87,34 @@
   .item-main{flex:1;min-width:0;}
   .item-text{font-size:14px;color:var(--ink);line-height:1.5;}
   .item-cost-tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;color:var(--ink-faint);background:var(--cream);border:1px solid var(--border);border-radius:20px;padding:1px 8px;margin-top:4px;}
+  .item-drag-handle{cursor:grab;color:var(--ink-faint);font-size:13px;padding:2px 4px;flex-shrink:0;touch-action:none;line-height:1.5;opacity:0.4;}
+  .item-drag-handle:active{cursor:grabbing;}
+  .item-row.dragging-item{opacity:0.35;background:var(--gold-light);border-radius:8px;}
+  .item-row.drag-target-above{border-top:2px solid var(--gold);}
+  .item-row.drag-target-below{border-bottom:2px solid var(--gold);}
   .item-actions{display:flex;gap:4px;flex-shrink:0;opacity:0;transition:opacity 0.15s;}
   .item-row:hover .item-actions{opacity:1;}
+  @media(max-width:768px){.item-actions{opacity:1;}}
+  .item-edit{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:13px;line-height:1;padding:2px 4px;border-radius:4px;transition:color 0.15s;}
+  .item-edit:hover{color:var(--ryan);}
   .item-delete{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:15px;line-height:1;padding:2px 4px;border-radius:4px;transition:color 0.15s;}
   .item-delete:hover{color:var(--louise);}
+
+  /* EDIT MODAL */
+  #editModal{display:none;position:fixed;inset:0;z-index:2000;background:rgba(28,26,23,0.45);align-items:center;justify-content:center;padding:20px;}
+  #editModal.open{display:flex;}
+  .edit-box{background:var(--warm-white);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:420px;width:100%;box-shadow:0 12px 48px rgba(28,26,23,0.2);}
+  .edit-title{font-family:'Lora',serif;font-size:16px;font-weight:600;margin-bottom:18px;color:var(--ink);}
+  .edit-row{display:flex;gap:8px;margin-bottom:10px;align-items:center;}
+  .edit-input{flex:1;background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;}
+  .edit-input:focus{border-color:var(--ryan);}
+  .edit-who-group{display:flex;gap:4px;margin-bottom:10px;}
+  .edit-cost-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  .edit-actions{display:flex;gap:8px;justify-content:flex-end;}
+  .edit-save{padding:8px 20px;border-radius:8px;border:none;background:var(--ink);color:var(--cream);font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s;}
+  .edit-save:hover{background:var(--ryan);}
+  .edit-cancel{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--ink-light);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+  .edit-cancel:hover{border-color:var(--louise);color:var(--louise);}
 
   /* ADD FORM */
   .add-form{border-top:1px solid var(--border);padding-top:14px;margin-top:4px;}
@@ -126,7 +150,33 @@
   .add-btn{padding:7px 16px;border-radius:8px;border:none;background:var(--ink);color:var(--cream);font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s;margin-left:auto;}
   .add-btn:hover{background:var(--ryan);}
 
-  /* FUTURE */
+  /* YEAR TABS */
+  .year-tabs{display:flex;align-items:center;gap:0;margin-bottom:20px;background:var(--warm-white);border:1px solid var(--border);border-radius:10px;padding:4px;width:fit-content;}
+  .year-tab{padding:7px 20px;border-radius:7px;border:none;background:transparent;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--ink-faint);transition:all 0.15s;letter-spacing:0.02em;}
+  .year-tab.active{background:var(--ink);color:var(--cream);}
+  .year-tab.active.y2{background:var(--ryan);}
+  .months-controls{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+  .month-count-info{font-size:12px;color:var(--ink-faint);}
+  .month-mgmt-btns{display:flex;gap:6px;}
+  .month-mgmt-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--warm-white);font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--ink-light);transition:all 0.15s;}
+  .month-mgmt-btn:hover{border-color:var(--ryan);color:var(--ryan);}
+  .month-mgmt-btn.remove:hover{border-color:var(--louise);color:var(--louise);}
+  .month-mgmt-btn:disabled{opacity:0.35;cursor:not-allowed;}
+  .month-mgmt-btn:disabled:hover{border-color:var(--border);color:var(--ink-light);}
+  /* month header delete btn */
+  .month-remove-btn{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:12px;padding:4px 6px;border-radius:4px;margin-left:4px;transition:color 0.15s;line-height:1;opacity:0.5;}
+  .month-remove-btn:hover{color:var(--louise);opacity:1;}
+
+  /* CONTEXT MENU */
+  #ctxMenu{display:none;position:fixed;z-index:9998;background:var(--warm-white);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 32px rgba(28,26,23,0.18);min-width:200px;overflow:hidden;}
+  #ctxMenu.open{display:block;}
+  .ctx-header{padding:8px 14px 6px;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);border-bottom:1px solid var(--border);}
+  .ctx-item{display:flex;align-items:center;gap:10px;padding:9px 14px;font-size:13px;color:var(--ink-light);cursor:pointer;transition:background 0.1s;}
+  .ctx-item:hover{background:var(--cream);color:var(--ink);}
+  .ctx-item .ctx-badge{font-size:10px;padding:1px 7px;border-radius:12px;background:var(--ryan-light);color:var(--ryan);font-weight:500;margin-left:auto;white-space:nowrap;}
+  .ctx-item.ctx-delete{color:var(--louise);}
+  .ctx-item.ctx-delete:hover{background:var(--louise-light);}
+  .ctx-divider{height:1px;background:var(--border);margin:3px 0;}
   .future-section{margin-bottom:48px;}
   .future-card{background:var(--warm-white);border:1px solid var(--border);border-radius:12px;padding:24px;box-shadow:var(--shadow);transition:border-color 0.2s,box-shadow 0.2s;}
   .future-card.drag-over{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-light);}
@@ -188,7 +238,6 @@
   <div class="header">
     <h1>Responsibilities<span class="accent">, Made Fun</span></h1>
     <div class="header-tagline">The life plan that doesn't feel like one</div>
-    <p class="header-sub"></p>
     <div class="header-date">Started April 2026</div>
     <button class="reset-btn" onclick="confirmReset()">Clear all data</button>
   </div>
@@ -215,6 +264,19 @@
   </div>
 
   <div class="section-title">Month by month</div>
+  <div class="months-controls">
+    <div class="year-tabs" id="yearTabs">
+      <button class="year-tab active" id="tabY1" onclick="switchYear(1)">Year 1</button>
+      <button class="year-tab y2" id="tabY2" onclick="switchYear(2)" style="display:none">Year 2</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span class="month-count-info" id="monthCountInfo"></span>
+      <div class="month-mgmt-btns">
+        <button class="month-mgmt-btn remove" id="btnRemoveMonth" onclick="removeLastMonth()" title="Remove last month">− Remove month</button>
+        <button class="month-mgmt-btn" id="btnAddMonth" onclick="addNextMonth()" title="Add next month">+ Add month</button>
+      </div>
+    </div>
+  </div>
   <div class="months-grid" id="monthsGrid"></div>
 
   <div class="future-section">
@@ -256,10 +318,41 @@
     </div>
   </div>
 
-  <div class="footer-note"></div>
+  </div>
+
+<!-- CONTEXT MENU -->
+<div id="ctxMenu">
+  <div class="ctx-header">Move to month</div>
+  <div id="ctxMonthList"></div>
+  <div class="ctx-divider"></div>
+  <div class="ctx-item ctx-delete" onclick="ctxDelete()">🗑 Delete item</div>
 </div>
 
-<div class="sync-bar">
+<!-- EDIT MODAL -->
+<div id="editModal">
+  <div class="edit-box">
+    <div class="edit-title">Edit item</div>
+    <div class="edit-row">
+      <button class="icon-picker-btn" id="editIconBtn"><span id="editIconDisp">✨</span></button>
+      <input class="edit-input" id="editText" placeholder="Item text…">
+    </div>
+    <div class="edit-who-group">
+      <button class="who-btn ryan" id="ew-ryan" onclick="setEditWho('ryan')">Ryan</button>
+      <button class="who-btn louise" id="ew-louise" onclick="setEditWho('louise')">Louise</button>
+      <button class="who-btn shared" id="ew-shared" onclick="setEditWho('shared')">Both</button>
+    </div>
+    <div class="edit-cost-row">
+      <label class="cost-toggle"><input type="checkbox" id="editCC" onchange="toggleEditCost()"> Has a cost</label>
+      <div class="cost-wrap" id="editCW"><span class="cost-sym">€</span><input class="cost-input" id="editCA" type="number" placeholder="0" min="0"></div>
+    </div>
+    <div class="edit-actions">
+      <button class="edit-cancel" onclick="closeEditModal()">Cancel</button>
+      <button class="edit-save" onclick="saveEditModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+
   <div class="sync-pill" id="syncPill">Saved</div>
   <div class="sync-pill error" id="errorPill">Could not save. Check connection.</div>
 </div>
@@ -270,15 +363,32 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const PASSWORD = 'InBrugesFiction';
 const POLL_MS = 15000;
 
-const MONTH_NAMES = ["April 2026","May 2026","June 2026","July 2026","August 2026","September 2026","October 2026","November 2026","December 2026","January 2027","February 2027","March 2027","April 2027"];
+/* ============================================================
+   MONTH GENERATION — dynamic, up to unlimited months
+============================================================ */
+const START_YEAR  = 2026;
+const START_MONTH = 4; // April = 4
+
+function monthName(n) {
+  // n is 1-based sequential month index
+  const totalMonths = (START_MONTH - 1) + (n - 1); // 0-based offset from Jan START_YEAR
+  const y = START_YEAR + Math.floor(totalMonths / 12);
+  const m = totalMonths % 12; // 0=Jan
+  const names = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  return names[m] + ' ' + y;
+}
+
+function yearOfMonth(n) {
+  // Returns 1 or 2 (or more) based on 12-month years
+  return Math.ceil(n / 12);
+}
+
 const ICONS = ["✨","🎯","🏠","✈️","💰","💍","🎉","🎂","🌍","🌊","🏖️","🏔️","🎓","💼","🛠️","📖","🎮","🎵","🍕","☕","🚗","🐶","❤️","🌱","💡","🏦","🗺️","📅","🎁","🤝","🏃","💪","🌟","🎪","🏋️","🎨"];
 
-const DEFAULT_MONTHS = [
-  {n:1,items:[]},{n:2,items:[]},{n:3,items:[]},{n:4,items:[]},{n:5,items:[]},{n:6,items:[]},{n:7,items:[]},
-  {n:8,items:[{text:"I hit €10,000 in savings",who:"ryan",icon:"💰",cost:null}]},
-  {n:9,items:[{text:"We meet with a mortgage adviser",who:"shared",icon:"🏦",cost:null}]},
-  {n:10,items:[]},{n:11,items:[]},{n:12,items:[]},{n:13,items:[]}
-];
+// monthCount is now dynamic — stored in data, default 12
+let monthCount = 12;
+let activeYear = 1;
+
 const DEFAULT_WISHLIST = [
   {id:"w1",icon:"✈️",text:"South-East Asia trip",sub:"Drag to a month or to after April 2027",assigned:false,assignedTo:null},
   {id:"w2",icon:"🏠",text:"Buy a house",sub:"Drag to a month or to after April 2027",assigned:false,assignedTo:null},
@@ -291,14 +401,20 @@ const DEFAULT_FUTURE = [
   {text:"We know where we're living and when",who:"shared",icon:"🗺️",cost:null},
 ];
 
+const DEFAULT_MONTHS_DATA = Array.from({length:12},(_,i)=>({n:i+1,items:
+  i===7?[{text:"I hit €10,000 in savings",who:"ryan",icon:"💰",cost:null}]:
+  i===8?[{text:"We meet with a mortgage adviser",who:"shared",icon:"🏦",cost:null}]:[]
+}));
+
 const ui = {
   monthWho:{}, monthIcon:{}, monthIconDisp:{},
   futureWho:'shared', futureIcon:'✨',
   wishIcon:'🌟',
   dragId:null,
+  reorderDragEl:null,
   pickerTarget:null  // current icon picker callback
 };
-DEFAULT_MONTHS.forEach(m=>{ ui.monthWho[m.n]='shared'; ui.monthIcon[m.n]='✨'; });
+// monthWho and monthIcon are populated lazily in buildMonthCard
 
 /* ============================================================
    ICON PICKER — single body-level popup
@@ -353,6 +469,13 @@ function wireStaticIconBtns() {
     openIconPopup(e.currentTarget, ui.wishIcon, ic => {
       ui.wishIcon = ic;
       document.getElementById('wishIconDisp').textContent = ic;
+    });
+  });
+  document.getElementById('editIconBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    openIconPopup(e.currentTarget, editModal.icon, ic => {
+      editModal.icon = ic;
+      document.getElementById('editIconDisp').textContent = ic;
     });
   });
 }
@@ -417,14 +540,23 @@ let lastHash  = '';
 function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(saveAll, 800); }
 
 async function saveAll() {
+  // Snapshot all visible month lists into cache first
+  document.querySelectorAll('[data-month]').forEach(card => {
+    const n = parseInt(card.dataset.month);
+    if (!ui.monthItems) ui.monthItems = {};
+    ui.monthItems[n] = serializeList('list-'+n);
+  });
   const data = {
     needsRyan:   document.getElementById('needsRyan').value,
     needsLouise: document.getElementById('needsLouise').value,
-    months:  {},
-    future:  serializeList('futureList'),
-    wishlist: serializeWishlist()
+    monthCount:  monthCount,
+    months:      {},
+    future:      serializeList('futureList'),
+    wishlist:    serializeWishlist()
   };
-  DEFAULT_MONTHS.forEach(m => { data.months[m.n] = serializeList('list-'+m.n); });
+  for (let n = 1; n <= monthCount; n++) {
+    data.months[n] = ui.monthItems?.[n] || [];
+  }
   const ok = await dbSet('plan', data);
   if (ok) { lastHash = JSON.stringify(data); showPill('syncPill'); }
   else     { showPill('errorPill'); }
@@ -439,13 +571,14 @@ function showPill(id) {
 function serializeList(listId) {
   const items = [];
   document.querySelectorAll('#'+listId+' .item-row').forEach(row => {
-    const dot  = row.querySelector('.item-dot');
-    const who  = dot ? (dot.classList.contains('ryan')?'ryan':dot.classList.contains('louise')?'louise':'shared') : 'shared';
-    const icon = row.querySelector('.item-icon')?.textContent.trim() || '✨';
+    const who  = row.dataset.who  || (() => {
+      const dot = row.querySelector('.item-dot');
+      return dot ? (dot.classList.contains('ryan')?'ryan':dot.classList.contains('louise')?'louise':'shared') : 'shared';
+    })();
+    const icon = row.dataset.icon || row.querySelector('.item-icon')?.textContent.trim() || '✨';
     const text = row.querySelector('.item-text')?.textContent.trim()  || '';
-    const costEl = row.querySelector('.item-cost-tag');
-    const cost = costEl ? costEl.textContent.replace('€','').trim() : null;
-    if (text) items.push({icon,who,text,cost});
+    const cost = row.dataset.cost || null;
+    if (text) items.push({icon,who,text,cost:cost||null});
   });
   return items;
 }
@@ -503,15 +636,287 @@ function removeItem(btn) { btn.closest('.item-row').remove(); scheduleSave(); }
 function makeLi(icon, who, text, cost) {
   const li = document.createElement('li');
   li.className = 'item-row';
+  li.draggable = true;
+  li.dataset.icon = icon;
+  li.dataset.who  = who;
+  li.dataset.cost = cost || '';
   const costHTML = (cost && parseFloat(cost)>0)
     ? `<span class="item-cost-tag">€${parseFloat(cost).toLocaleString('en-IE',{minimumFractionDigits:0,maximumFractionDigits:2})}</span>` : '';
   li.innerHTML = `
+    <span class="item-drag-handle" title="Drag to reorder">⠿</span>
     <span class="item-icon">${icon}</span>
     <span class="item-dot ${who}"></span>
     <div class="item-main"><span class="item-text">${text}</span>${costHTML}</div>
-    <div class="item-actions"><button class="item-delete" onclick="removeItem(this)">×</button></div>`;
+    <div class="item-actions">
+      <button class="item-edit" onclick="openEditModal(this)" title="Edit">✎</button>
+      <button class="item-delete" onclick="removeItem(this)" title="Delete">×</button>
+    </div>`;
+  // Desktop drag-to-reorder
+  li.addEventListener('dragstart', e => {
+    if (e.target.classList.contains('item-drag-handle') || e.target === li) {
+      ui.reorderDragEl = li;
+      li.classList.add('dragging-item');
+      e.dataTransfer.effectAllowed = 'move';
+      e.stopPropagation(); // don't trigger wish drag
+    } else {
+      e.preventDefault();
+    }
+  });
+  li.addEventListener('dragend', () => {
+    li.classList.remove('dragging-item');
+    document.querySelectorAll('.drag-target-above,.drag-target-below').forEach(el=>el.classList.remove('drag-target-above','drag-target-below'));
+    ui.reorderDragEl = null;
+  });
+  li.addEventListener('dragover', e => {
+    if (!ui.reorderDragEl || ui.reorderDragEl === li) return;
+    e.preventDefault(); e.stopPropagation();
+    const rect = li.getBoundingClientRect();
+    const mid  = rect.top + rect.height/2;
+    li.classList.remove('drag-target-above','drag-target-below');
+    li.classList.add(e.clientY < mid ? 'drag-target-above' : 'drag-target-below');
+  });
+  li.addEventListener('dragleave', () => {
+    li.classList.remove('drag-target-above','drag-target-below');
+  });
+  li.addEventListener('drop', e => {
+    if (!ui.reorderDragEl || ui.reorderDragEl === li) return;
+    e.preventDefault(); e.stopPropagation();
+    const rect = li.getBoundingClientRect();
+    const mid  = rect.top + rect.height/2;
+    const parent = li.parentNode;
+    if (e.clientY < mid) parent.insertBefore(ui.reorderDragEl, li);
+    else                 parent.insertBefore(ui.reorderDragEl, li.nextSibling);
+    li.classList.remove('drag-target-above','drag-target-below');
+    scheduleSave();
+  });
+  // Touch drag-to-reorder
+  setupTouchDrag(li);
+  // Right-click context menu
+  li.addEventListener('contextmenu', e => openCtxMenu(e, li));
+  // Long press for mobile
+  let longPressTimer;
+  li.addEventListener('touchstart', e => {
+    // Don't trigger if on drag handle or buttons
+    if (e.target.closest('.item-drag-handle,.item-actions')) return;
+    longPressTimer = setTimeout(() => { openCtxMenu(e, li); }, 600);
+  }, {passive:true});
+  li.addEventListener('touchend',    () => clearTimeout(longPressTimer));
+  li.addEventListener('touchmove',   () => clearTimeout(longPressTimer));
+  li.addEventListener('touchcancel', () => clearTimeout(longPressTimer));
   return li;
 }
+
+/* ============================================================
+   TOUCH DRAG-TO-REORDER
+============================================================ */
+function setupTouchDrag(li) {
+  let startY, clone, placeholder, listEl, items, startIndex;
+  const handle = li.querySelector('.item-drag-handle');
+  handle.addEventListener('touchstart', e => {
+    e.stopPropagation();
+    startY = e.touches[0].clientY;
+    listEl = li.closest('.items-list');
+    if (!listEl) return;
+    const rect = li.getBoundingClientRect();
+    // Create ghost clone
+    clone = li.cloneNode(true);
+    clone.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;opacity:0.85;z-index:3000;pointer-events:none;box-shadow:0 8px 24px rgba(28,26,23,0.18);border-radius:8px;background:var(--warm-white);`;
+    document.body.appendChild(clone);
+    // Placeholder
+    placeholder = document.createElement('li');
+    placeholder.className = 'item-row';
+    placeholder.style.cssText = 'border:2px dashed var(--gold);border-radius:8px;background:var(--gold-light);opacity:0.5;min-height:40px;';
+    li.parentNode.insertBefore(placeholder, li);
+    li.style.display = 'none';
+  }, {passive:true});
+
+  handle.addEventListener('touchmove', e => {
+    if (!clone) return;
+    e.preventDefault();
+    const ty = e.touches[0].clientY;
+    const dy = ty - startY;
+    const rect = li.getBoundingClientRect();
+    clone.style.top = (parseFloat(clone.style.top) + dy) + 'px';
+    startY = ty;
+    // Find closest sibling
+    const siblings = Array.from(listEl.querySelectorAll('.item-row:not([style*="display: none"])'));
+    let target = null, insertBefore = true;
+    for (const sib of siblings) {
+      if (sib === placeholder) continue;
+      const r = sib.getBoundingClientRect();
+      const mid = r.top + r.height/2;
+      if (ty < mid) { target = sib; insertBefore = true; break; }
+      else          { target = sib; insertBefore = false; }
+    }
+    if (target) {
+      if (insertBefore) listEl.insertBefore(placeholder, target);
+      else listEl.insertBefore(placeholder, target.nextSibling);
+    } else {
+      listEl.appendChild(placeholder);
+    }
+  }, {passive:false});
+
+  const endTouch = () => {
+    if (!clone) return;
+    document.body.removeChild(clone); clone = null;
+    li.style.display = '';
+    placeholder.parentNode.insertBefore(li, placeholder);
+    placeholder.remove(); placeholder = null;
+    scheduleSave();
+  };
+  handle.addEventListener('touchend', endTouch);
+  handle.addEventListener('touchcancel', endTouch);
+}
+
+/* ============================================================
+   EDIT MODAL
+============================================================ */
+const editModal = { targetLi: null, icon: '✨', who: 'shared' };
+
+function openEditModal(btn) {
+  const li = btn.closest('.item-row');
+  editModal.targetLi = li;
+  editModal.icon = li.dataset.icon || '✨';
+  editModal.who  = li.dataset.who  || 'shared';
+  const text = li.querySelector('.item-text')?.textContent.trim() || '';
+  const cost = li.dataset.cost || '';
+  document.getElementById('editIconDisp').textContent = editModal.icon;
+  document.getElementById('editText').value = text;
+  document.getElementById('editCC').checked = !!(cost && parseFloat(cost)>0);
+  document.getElementById('editCA').value = cost || '';
+  document.getElementById('editCW').classList.toggle('show', !!(cost && parseFloat(cost)>0));
+  setEditWho(editModal.who);
+  document.getElementById('editModal').classList.add('open');
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('open');
+  editModal.targetLi = null;
+}
+
+function setEditWho(w) {
+  editModal.who = w;
+  ['ryan','louise','shared'].forEach(x => document.getElementById('ew-'+x).classList.toggle('active', x===w));
+}
+
+function toggleEditCost() {
+  const chk = document.getElementById('editCC');
+  document.getElementById('editCW').classList.toggle('show', chk.checked);
+}
+
+function saveEditModal() {
+  const li = editModal.targetLi; if (!li) return;
+  const text = document.getElementById('editText').value.trim(); if (!text) return;
+  const chk  = document.getElementById('editCC');
+  const cost = chk.checked ? document.getElementById('editCA').value : null;
+  const icon = editModal.icon;
+  const who  = editModal.who;
+  li.dataset.icon = icon;
+  li.dataset.who  = who;
+  li.dataset.cost = cost || '';
+  li.querySelector('.item-icon').textContent = icon;
+  li.querySelector('.item-text').textContent = text;
+  const oldDot = li.querySelector('.item-dot');
+  if (oldDot) { oldDot.className = `item-dot ${who}`; }
+  const oldCost = li.querySelector('.item-cost-tag');
+  if (oldCost) oldCost.remove();
+  if (cost && parseFloat(cost)>0) {
+    const tag = document.createElement('span');
+    tag.className = 'item-cost-tag';
+    tag.textContent = `€${parseFloat(cost).toLocaleString('en-IE',{minimumFractionDigits:0,maximumFractionDigits:2})}`;
+    li.querySelector('.item-main').appendChild(tag);
+  }
+  closeEditModal();
+  scheduleSave();
+}
+
+document.getElementById('editModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('editModal')) closeEditModal();
+});
+
+/* ============================================================
+   CONTEXT MENU — long press / right click on items
+============================================================ */
+const ctxMenu = document.getElementById('ctxMenu');
+const ctx = { targetLi: null };
+
+function openCtxMenu(e, li) {
+  e.preventDefault();
+  ctx.targetLi = li;
+  // Build month list
+  const list = document.getElementById('ctxMonthList');
+  list.innerHTML = '';
+  for (let n = 1; n <= monthCount; n++) {
+    // Check if this li is already in this month
+    const monthList = document.getElementById('list-'+n);
+    const already = monthList && monthList.contains(li);
+    const div = document.createElement('div');
+    div.className = 'ctx-item';
+    div.innerHTML = `<span>${monthName(n)}</span>${already?'<span class="ctx-badge">current</span>':''}`;
+    if (!already) {
+      div.addEventListener('click', () => ctxMoveToMonth(n));
+    } else {
+      div.style.opacity = '0.5';
+      div.style.cursor = 'default';
+    }
+    list.appendChild(div);
+  }
+  // Position
+  const x = e.clientX || (e.touches?.[0]?.clientX) || 100;
+  const y = e.clientY || (e.touches?.[0]?.clientY) || 100;
+  const menuW = 220, menuH = Math.min(monthCount * 40 + 80, 400);
+  ctxMenu.style.left = Math.min(x, window.innerWidth  - menuW - 10) + 'px';
+  ctxMenu.style.top  = Math.min(y + window.scrollY, window.scrollY + window.innerHeight - menuH - 10) + 'px';
+  ctxMenu.classList.add('open');
+}
+
+function ctxMoveToMonth(n) {
+  const li = ctx.targetLi; if (!li) return;
+  // Make sure month is visible — switch year if needed
+  const targetYear = yearOfMonth(n);
+  if (targetYear !== activeYear) {
+    switchYear(targetYear);
+    // After rebuild we need to re-add — so serialize and defer
+    const item = {
+      icon: li.dataset.icon || '✨',
+      who:  li.dataset.who  || 'shared',
+      text: li.querySelector('.item-text')?.textContent.trim() || '',
+      cost: li.dataset.cost || null
+    };
+    li.remove();
+    setTimeout(() => {
+      const targetList = document.getElementById('list-'+n);
+      if (targetList) {
+        targetList.appendChild(makeLi(item.icon, item.who, item.text, item.cost));
+        document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open');
+        scheduleSave();
+      }
+    }, 50);
+  } else {
+    const targetList = document.getElementById('list-'+n);
+    if (targetList) {
+      li.remove();
+      targetList.appendChild(li);
+      document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open');
+      scheduleSave();
+    }
+  }
+  closeCtxMenu();
+}
+
+function ctxDelete() {
+  if (ctx.targetLi) { ctx.targetLi.remove(); scheduleSave(); }
+  closeCtxMenu();
+}
+
+function closeCtxMenu() {
+  ctxMenu.classList.remove('open');
+  ctx.targetLi = null;
+}
+
+document.addEventListener('click',       e => { if (!ctxMenu.contains(e.target)) closeCtxMenu(); });
+document.addEventListener('contextmenu', e => { if (!ctxMenu.contains(e.target)) closeCtxMenu(); });
+document.addEventListener('keydown',     e => { if (e.key === 'Escape') closeCtxMenu(); });
 
 /* ============================================================
    FUTURE
@@ -565,77 +970,185 @@ function addMonthItem(n) {
 
 function toggleMonth(header) { header.closest('.month-card').classList.toggle('open'); }
 
-function buildMonths(savedData) {
-  const grid = document.getElementById('monthsGrid');
-  grid.innerHTML = '';
-  DEFAULT_MONTHS.forEach(m => {
-    const savedItems = (savedData?.months?.[m.n]) || m.items;
-    const hasContent = savedItems.length > 0;
-    const card = document.createElement('div');
-    card.className = 'month-card'+(hasContent?' has-content open':'');
-    card.dataset.month = m.n;
-    const name    = MONTH_NAMES[m.n-1];
-    const preview = hasContent
-      ? savedItems[0].text + (savedItems.length>1 ? ` +${savedItems.length-1} more` : '')
-      : 'Nothing planned yet';
-
-    card.innerHTML = `
-      <div class="month-header" onclick="toggleMonth(this)">
-        <div class="month-header-left">
-          <div class="month-badge">${name}</div>
-          <div><div class="month-label">Month ${m.n}</div><div class="month-preview">${preview}</div></div>
-        </div><span class="month-toggle">⌄</span>
-      </div>
-      <div class="month-body">
-        <div class="drop-hint">Drop here to add to ${name}</div>
-        <ul class="items-list" id="list-${m.n}"></ul>
-        <div class="add-form">
-          <div class="add-row1">
-            <button class="icon-picker-btn" data-month-n="${m.n}"><span class="mIconDisp" data-month-n="${m.n}">✨</span></button>
-            <input class="add-input" id="inp-${m.n}" placeholder="Add something to ${name}…" onkeydown="if(event.key==='Enter')addMonthItem(${m.n})">
-          </div>
-          <div class="add-row2">
-            <div class="who-group">
-              <button class="who-btn ryan" id="mw-ryan-${m.n}" onclick="setMWho(${m.n},'ryan')">Ryan</button>
-              <button class="who-btn louise" id="mw-louise-${m.n}" onclick="setMWho(${m.n},'louise')">Louise</button>
-              <button class="who-btn shared active" id="mw-shared-${m.n}" onclick="setMWho(${m.n},'shared')">Both</button>
-            </div>
-            <label class="cost-toggle"><input type="checkbox" id="cc-${m.n}" onchange="toggleCost(${m.n})"> Has a cost</label>
-            <div class="cost-wrap" id="cw-${m.n}"><span class="cost-sym">€</span><input class="cost-input" id="ca-${m.n}" type="number" placeholder="0" min="0"></div>
-            <button class="add-btn" onclick="addMonthItem(${m.n})">Add</button>
-          </div>
-        </div>
-      </div>`;
-
-    /* month icon picker button */
-    const iconBtn = card.querySelector('.icon-picker-btn');
-    const iconDisp = card.querySelector('.mIconDisp');
-    iconBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      openIconPopup(iconBtn, ui.monthIcon[m.n], ic => {
-        ui.monthIcon[m.n] = ic;
-        iconDisp.textContent = ic;
-      });
-    });
-
-    /* drag/drop */
-    card.addEventListener('dragover',  e => { e.preventDefault(); card.classList.add('drag-over'); });
-    card.addEventListener('dragleave', e => { if(!card.contains(e.relatedTarget)) card.classList.remove('drag-over'); });
-    card.addEventListener('drop', e => {
-      e.preventDefault(); card.classList.remove('drag-over');
-      if(!ui.dragId) return;
-      const wish = getWishById(ui.dragId); if(!wish) return;
-      document.getElementById('list-'+m.n).appendChild(makeLi(wish.icon,'shared',wish.text,null));
-      card.classList.add('has-content','open');
-      assignWish(ui.dragId, name);
-      ui.dragId=null; scheduleSave();
-    });
-
-    grid.appendChild(card);
-    const list = document.getElementById('list-'+m.n);
-    savedItems.forEach(item => list.appendChild(makeLi(item.icon,item.who,item.text,item.cost)));
-  });
+/* ============================================================
+   YEAR TABS & MONTH MANAGEMENT
+============================================================ */
+function switchYear(y) {
+  activeYear = y;
+  document.getElementById('tabY1').classList.toggle('active', y===1);
+  document.getElementById('tabY2').classList.toggle('active', y===2);
+  buildMonthsView();
 }
+
+function updateYearTabs() {
+  const hasY2 = monthCount > 12;
+  document.getElementById('tabY2').style.display = hasY2 ? '' : 'none';
+  if (!hasY2 && activeYear === 2) {
+    activeYear = 1;
+    document.getElementById('tabY1').classList.add('active');
+    document.getElementById('tabY2').classList.remove('active');
+  }
+  updateMonthCountInfo();
+}
+
+function updateMonthCountInfo() {
+  const y1count = Math.min(monthCount, 12);
+  const y2count = Math.max(0, monthCount - 12);
+  let info = `${monthCount} month${monthCount!==1?'s':''} total`;
+  if (y2count > 0) info += ` · Y1: ${y1count}, Y2: ${y2count}`;
+  document.getElementById('monthCountInfo').textContent = info;
+  document.getElementById('btnRemoveMonth').disabled = monthCount <= 1;
+}
+
+function addNextMonth() {
+  monthCount++;
+  const n = monthCount;
+  if (!ui.monthWho[n]) ui.monthWho[n] = 'shared';
+  if (!ui.monthIcon[n]) ui.monthIcon[n] = '✨';
+  if (n === 13) {
+    document.getElementById('tabY2').style.display = '';
+    activeYear = 2;
+    document.getElementById('tabY1').classList.remove('active');
+    document.getElementById('tabY2').classList.add('active');
+  }
+  updateYearTabs();
+  buildMonthsView();
+  scheduleSave();
+}
+
+function removeLastMonth() {
+  if (monthCount <= 1) return;
+  const lastList = document.getElementById('list-'+monthCount);
+  const hasItems = lastList && lastList.querySelectorAll('.item-row').length > 0;
+  if (hasItems && !confirm(`${monthName(monthCount)} has items. Remove it anyway?`)) return;
+  monthCount--;
+  updateYearTabs();
+  buildMonthsView();
+  scheduleSave();
+}
+
+function buildMonthsView() {
+  const grid = document.getElementById('monthsGrid');
+  const currentData = {};
+  document.querySelectorAll('[data-month]').forEach(card => {
+    const n = parseInt(card.dataset.month);
+    currentData[n] = serializeList('list-'+n);
+  });
+  // Merge into ui.monthItems cache
+  if (!ui.monthItems) ui.monthItems = {};
+  Object.assign(ui.monthItems, currentData);
+  grid.innerHTML = '';
+  const start = (activeYear - 1) * 12 + 1;
+  const end   = Math.min(activeYear * 12, monthCount);
+  for (let n = start; n <= end; n++) {
+    const items = ui.monthItems[n] || [];
+    buildMonthCard(grid, n, items);
+  }
+  updateMonthCountInfo();
+}
+
+function buildMonthCard(grid, n, savedItems) {
+  const hasContent = savedItems.length > 0;
+  const card = document.createElement('div');
+  card.className = 'month-card'+(hasContent?' has-content open':'');
+  card.dataset.month = n;
+  const name    = monthName(n);
+  const yearNum = yearOfMonth(n);
+  const localN  = ((n-1) % 12) + 1;
+  const preview = hasContent
+    ? savedItems[0].text + (savedItems.length>1 ? ` +${savedItems.length-1} more` : '')
+    : 'Nothing planned yet';
+
+  if (!ui.monthWho[n]) ui.monthWho[n] = 'shared';
+  if (!ui.monthIcon[n]) ui.monthIcon[n] = '✨';
+
+  card.innerHTML = `
+    <div class="month-header" onclick="toggleMonth(this)">
+      <div class="month-header-left">
+        <div class="month-badge">${name}</div>
+        <div><div class="month-label">Month ${localN}${yearNum>1?' <span style="font-size:10px;opacity:0.6">Y'+yearNum+'</span>':''}</div><div class="month-preview">${preview}</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;">
+        ${n === monthCount ? `<button class="month-remove-btn" onclick="removeThisMonth(event,${n})" title="Remove this month">✕</button>` : ''}
+        <span class="month-toggle">⌄</span>
+      </div>
+    </div>
+    <div class="month-body">
+      <div class="drop-hint">Drop here to add to ${name}</div>
+      <ul class="items-list" id="list-${n}"></ul>
+      <div class="add-form">
+        <div class="add-row1">
+          <button class="icon-picker-btn" data-month-n="${n}"><span class="mIconDisp" data-month-n="${n}">✨</span></button>
+          <input class="add-input" id="inp-${n}" placeholder="Add something to ${name}…" onkeydown="if(event.key==='Enter')addMonthItem(${n})">
+        </div>
+        <div class="add-row2">
+          <div class="who-group">
+            <button class="who-btn ryan" id="mw-ryan-${n}" onclick="setMWho(${n},'ryan')">Ryan</button>
+            <button class="who-btn louise" id="mw-louise-${n}" onclick="setMWho(${n},'louise')">Louise</button>
+            <button class="who-btn shared active" id="mw-shared-${n}" onclick="setMWho(${n},'shared')">Both</button>
+          </div>
+          <label class="cost-toggle"><input type="checkbox" id="cc-${n}" onchange="toggleCost(${n})"> Has a cost</label>
+          <div class="cost-wrap" id="cw-${n}"><span class="cost-sym">€</span><input class="cost-input" id="ca-${n}" type="number" placeholder="0" min="0"></div>
+          <button class="add-btn" onclick="addMonthItem(${n})">Add</button>
+        </div>
+      </div>
+    </div>`;
+
+  const iconBtn = card.querySelector('.icon-picker-btn');
+  const iconDisp = card.querySelector('.mIconDisp');
+  iconBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    openIconPopup(iconBtn, ui.monthIcon[n], ic => {
+      ui.monthIcon[n] = ic;
+      iconDisp.textContent = ic;
+    });
+  });
+
+  card.addEventListener('dragover',  e => {
+    if (ui.reorderDragEl) return;
+    e.preventDefault(); card.classList.add('drag-over');
+  });
+  card.addEventListener('dragleave', e => { if(!card.contains(e.relatedTarget)) card.classList.remove('drag-over'); });
+  card.addEventListener('drop', e => {
+    e.preventDefault(); card.classList.remove('drag-over');
+    if(ui.reorderDragEl) return;
+    if(!ui.dragId) return;
+    const wish = getWishById(ui.dragId); if(!wish) return;
+    document.getElementById('list-'+n).appendChild(makeLi(wish.icon,'shared',wish.text,null));
+    card.classList.add('has-content','open');
+    assignWish(ui.dragId, name);
+    ui.dragId=null; scheduleSave();
+  });
+
+  grid.appendChild(card);
+  const list = document.getElementById('list-'+n);
+  savedItems.forEach(item => list.appendChild(makeLi(item.icon,item.who,item.text,item.cost)));
+}
+
+function removeThisMonth(e, n) {
+  e.stopPropagation();
+  if (n !== monthCount) return;
+  removeLastMonth();
+}
+
+function buildMonths(savedData) {
+  monthCount = savedData?.monthCount || 12;
+  ui.monthItems = {};
+  for (let n = 1; n <= monthCount; n++) {
+    ui.monthItems[n] = savedData?.months?.[n] || getDefaultItems(n);
+    if (!ui.monthWho[n]) ui.monthWho[n] = 'shared';
+    if (!ui.monthIcon[n]) ui.monthIcon[n] = '✨';
+  }
+  updateYearTabs();
+  buildMonthsView();
+}
+
+function getDefaultItems(n) {
+  if (n === 8) return [{text:"I hit €10,000 in savings",who:"ryan",icon:"💰",cost:null}];
+  if (n === 9) return [{text:"We meet with a mortgage adviser",who:"shared",icon:"🏦",cost:null}];
+  return [];
+}
+
 
 /* ============================================================
    WISHLIST
