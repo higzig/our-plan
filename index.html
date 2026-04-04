@@ -94,11 +94,12 @@
   .items-list{list-style:none;margin-bottom:12px;}
   .item-row{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);}
   .item-row:last-child{border-bottom:none;}
-  .item-icon{font-size:16px;flex-shrink:0;line-height:1.5;}
   .item-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:7px;}
   .item-dot.ryan{background:var(--ryan);}.item-dot.louise{background:var(--louise);}.item-dot.shared{background:var(--gold);}
   .item-main{flex:1;min-width:0;}
+  .item-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
   .item-text{font-size:14px;color:var(--ink);line-height:1.5;}
+  .item-desc{font-size:12px;color:var(--ink-faint);font-style:italic;margin-top:2px;line-height:1.4;}
   .item-cost-tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;color:var(--ink-faint);background:var(--cream);border:1px solid var(--border);border-radius:20px;padding:1px 8px;margin-top:4px;}
   .item-drag-handle{cursor:grab;color:var(--ink-faint);font-size:13px;padding:2px 4px;flex-shrink:0;touch-action:none;line-height:1.5;opacity:0.4;}
   .item-drag-handle:active{cursor:grabbing;}
@@ -110,13 +111,9 @@
   @media(max-width:768px){.item-actions{opacity:1;}}
   .item-edit{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:13px;line-height:1;padding:2px 4px;border-radius:4px;transition:color 0.15s;}
   .item-edit:hover{color:var(--ryan);}
-  .wish-item .item-edit{opacity:0;transition:opacity 0.15s,color 0.15s;}
-  .wish-item:hover .item-edit,.wish-item .item-edit{opacity:1;}
   .item-delete{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:15px;line-height:1;padding:2px 4px;border-radius:4px;transition:color 0.15s;}
   .item-delete:hover{color:var(--louise);}
-  .item-colon{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:14px;font-weight:700;line-height:1;padding:2px 5px;border-radius:4px;transition:all 0.15s;flex-shrink:0;}
-  .item-colon:hover{background:var(--ryan-light);color:var(--ryan);}
-  .item-cat{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:500;padding:1px 7px;border-radius:12px;margin-left:6px;vertical-align:middle;}
+  .item-cat{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:500;padding:1px 7px;border-radius:12px;vertical-align:middle;flex-shrink:0;}
 
   /* EDIT MODAL */
   #editModal{display:none;position:fixed;inset:0;z-index:2000;background:rgba(28,26,23,0.45);align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
@@ -142,6 +139,12 @@
   .add-input{flex:1;background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;transition:border-color 0.2s;}
   .add-input:focus{border-color:var(--ryan);}
   .add-input::placeholder{color:var(--ink-faint);font-style:italic;}
+  .add-row-cat{display:flex;gap:8px;margin-bottom:8px;align-items:center;}
+  .add-cat-select{flex:1;background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--ink-light);outline:none;cursor:pointer;}
+  .add-cat-select:focus{border-color:var(--ryan);}
+  .add-desc-input{width:100%;background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;transition:border-color 0.2s;margin-bottom:8px;}
+  .add-desc-input:focus{border-color:var(--ryan);}
+  .add-desc-input::placeholder{color:var(--ink-faint);font-style:italic;}
   .icon-picker-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--cream);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color 0.15s;}
   .icon-picker-btn:hover{border-color:var(--ryan);}
   #iconPopup{display:none;position:fixed;z-index:9999;background:var(--warm-white);border:1px solid var(--border);border-radius:10px;padding:10px;box-shadow:0 8px 24px rgba(28,26,23,0.18);width:236px;}
@@ -205,21 +208,21 @@
   .wishlist-section{margin-bottom:48px;}
   .wishlist-intro{font-size:13px;color:var(--ink-faint);font-style:italic;margin-bottom:16px;}
   .wishlist-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
-  .wish-item{background:var(--warm-white);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);cursor:grab;transition:all 0.15s;user-select:none;}
+  .wish-item{background:var(--warm-white);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--shadow);cursor:grab;transition:all 0.15s;user-select:none;}
   .wish-item:hover{box-shadow:0 4px 20px rgba(28,26,23,0.12);transform:translateY(-1px);}
   .wish-item.dragging{opacity:0.35;cursor:grabbing;}
   .wish-item.assigned{opacity:0.55;}
-  .wish-icon{font-size:22px;flex-shrink:0;}
+  .wish-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
   .wish-text{font-size:14px;font-weight:500;color:var(--ink);}
-  .wish-sub{font-size:11px;color:var(--ink-faint);font-style:italic;margin-top:2px;}
+  .wish-desc{font-size:11px;color:var(--ink-faint);font-style:italic;margin-top:3px;line-height:1.4;}
   .wish-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;letter-spacing:0.05em;background:var(--gold-light);color:#8a6a1a;margin-top:4px;display:inline-block;}
-  .wish-delete{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:15px;padding:2px 4px;border-radius:4px;opacity:0;transition:opacity 0.15s,color 0.15s;flex-shrink:0;}
-  .wish-item:hover .wish-delete{opacity:1;}
+  .wish-actions{display:flex;gap:2px;flex-shrink:0;opacity:0;transition:opacity 0.15s;margin-top:1px;}
+  .wish-item:hover .wish-actions{opacity:1;}
+  @media(max-width:768px){.wish-actions{opacity:1;}}
+  .wish-delete{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:15px;padding:2px 4px;border-radius:4px;transition:color 0.15s;flex-shrink:0;}
   .wish-delete:hover{color:var(--louise);}
-  .wish-colon{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:14px;font-weight:700;line-height:1;padding:3px 6px;border-radius:4px;transition:all 0.15s;flex-shrink:0;opacity:0;}
-  .wish-item:hover .wish-colon{opacity:1;}
-  .wish-colon:hover{background:var(--ryan-light);color:var(--ryan);}
-  @media(max-width:768px){.wish-delete,.wish-colon,.wish-item .item-edit{opacity:1!important;}}
+  .wish-edit{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:13px;padding:2px 4px;border-radius:4px;transition:color 0.15s;flex-shrink:0;}
+  .wish-edit:hover{color:var(--ryan);}
   .add-wish-form{background:var(--warm-white);border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:var(--shadow);}
   .add-wish-title{font-size:12px;font-weight:500;color:var(--ink-faint);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;}
 
@@ -312,8 +315,11 @@
       <ul class="items-list" id="futureList"></ul>
       <div class="add-form">
         <div class="add-row1">
-          <button class="icon-picker-btn" id="fIconBtn"><span id="fIconDisp">✨</span></button>
           <input class="add-input" id="futureInput" placeholder="Add something for someday…" onkeydown="if(event.key==='Enter')addFuture()">
+        </div>
+        <input class="add-desc-input" id="futureDesc" placeholder="Description (optional)…">
+        <div class="add-row-cat">
+          <select class="add-cat-select" id="futureCat"><option value="">No category</option></select>
         </div>
         <div class="add-row2">
           <div class="who-group">
@@ -331,14 +337,17 @@
 
   <div class="wishlist-section">
     <div class="section-title">Things we'd like to do</div>
-    <p class="wishlist-intro">Drag into a month or use ∶ to assign. Add your own below.</p>
+    <p class="wishlist-intro">Drag into a month to assign, or use the edit button.</p>
     <div class="wishlist-grid" id="wishGrid"></div>
     <div class="add-wish-form">
       <div class="add-wish-title">Add something to the list</div>
       <div class="add-row1">
-        <button class="icon-picker-btn" id="wishIconBtn"><span id="wishIconDisp">🌟</span></button>
         <input class="add-input" id="wishInput" placeholder="Something we want to do together…" onkeydown="if(event.key==='Enter')addWishItem()">
         <button class="add-btn" onclick="addWishItem()">Add</button>
+      </div>
+      <input class="add-desc-input" id="wishDesc" placeholder="Description (optional)…">
+      <div class="add-row-cat">
+        <select class="add-cat-select" id="wishCat"><option value="">No category</option></select>
       </div>
     </div>
   </div>
@@ -355,9 +364,10 @@
 <div id="editModal">
   <div class="edit-box">
     <div class="edit-title" id="editModalTitle">Edit item</div>
-    <div class="edit-row">
-      <button class="icon-picker-btn" id="editIconBtn"><span id="editIconDisp">✨</span></button>
-      <input class="edit-input" id="editText" placeholder="Item text…">
+    <input class="edit-input" id="editText" placeholder="Item text…" style="width:100%;margin-bottom:10px;">
+    <div style="margin-bottom:10px;">
+      <div class="edit-section-label">Description <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></div>
+      <textarea class="edit-input" id="editDesc" placeholder="Add a note or description…" rows="2" style="width:100%;resize:none;font-size:13px;"></textarea>
     </div>
     <div class="edit-who-group" id="editWhoGroup">
       <button class="who-btn ryan" id="ew-ryan" onclick="setEditWho('ryan')">Ryan</button>
@@ -370,10 +380,10 @@
     </div>
     <div class="edit-section-label">Category</div>
     <select class="edit-select" id="editCatSelect"></select>
-    <div id="editAssignRow" style="display:none">
-      <div class="edit-section-label">Assign to</div>
+    <div id="editAssignRow">
+      <div class="edit-section-label">Move to</div>
       <select class="edit-select" id="editAssignSelect">
-        <option value="">— keep in current section —</option>
+        <option value="">— keep where it is —</option>
         <option value="someday">Someday</option>
       </select>
     </div>
@@ -536,11 +546,11 @@ async function loadAll() {
     if (item.location.startsWith('month:')) {
       const n = parseInt(item.location.split(':')[1]);
       if (!ui.monthItems[n]) ui.monthItems[n]=[];
-      ui.monthItems[n].push(item);
+      ui.monthItems[n].push({...item, desc:item.description||''});
     } else if (item.location==='someday') {
-      futureItems.push(item);
+      futureItems.push({...item, desc:item.description||''});
     } else if (item.location==='wishlist') {
-      wishItems.push(item);
+      wishItems.push({...item, desc:item.description||''});
     }
   });
 
@@ -612,7 +622,19 @@ async function saveAll() {
   const {error:delErr} = await sb.from('items').delete().eq('couple_id',COUPLE_ID);
   if (delErr) { showPill('errorPill'); return; }
   if (allItems.length) {
-    const {error:insErr} = await sb.from('items').insert(allItems);
+    const rows = allItems.map(item=>({
+      couple_id:COUPLE_ID,
+      location:item.location,
+      text:item.text,
+      icon:item.icon||'✨',
+      who:item.who||'shared',
+      cost:item.cost||null,
+      category:item.category||null,
+      sort_order:item.sort_order||0,
+      assigned_to:item.assigned_to||null,
+      description:item.description||null
+    }));
+    const {error:insErr} = await sb.from('items').insert(rows);
     if (insErr) { showPill('errorPill'); return; }
   }
 
@@ -634,13 +656,14 @@ function showPill(id){
 function serializeList(listId){
   const items=[];
   document.querySelectorAll('#'+listId+' .item-row').forEach(row=>{
-    const who = row.dataset.who || 'shared';
+    const who = row.dataset.who||'shared';
     const icon= row.dataset.icon||'✨';
     const text= row.querySelector('.item-text')?.textContent.trim()||'';
     const cost= row.dataset.cost||null;
     const cat = row.dataset.cat||'';
+    const desc= row.dataset.desc||'';
     const id  = row.dataset.dbid||null;
-    if(text) items.push({id,icon,who,text,cost:cost||null,category:cat});
+    if(text) items.push({id,icon,who,text,cost:cost||null,category:cat,description:desc});
   });
   return items;
 }
@@ -650,16 +673,15 @@ function serializeWishlist(){
   document.querySelectorAll('#wishGrid .wish-item').forEach(el=>{
     const wtEl   = el.querySelector('.wish-text');
     const catPil = wtEl?.querySelector('.item-cat');
-    const text   = catPil ? (wtEl.textContent||'').replace(catPil.textContent,'').trim() : (wtEl?.textContent.trim()||'');
+    const text   = catPil?(wtEl.textContent||'').replace(catPil.textContent,'').trim():(wtEl?.textContent.trim()||'');
     const icon   = el.querySelector('.wish-icon')?.textContent.trim()||'🌟';
     const badge  = el.querySelector('.wish-badge');
-    const sub    = el.querySelector('.wish-sub');
     const assigned   = el.classList.contains('assigned');
-    const assignedTo = badge ? badge.textContent.replace('Added to ','') : null;
-    const subText    = (!assigned && sub) ? sub.textContent : 'Drag to a month or use ∶';
+    const assignedTo = badge?badge.textContent.replace('Added to ',''):null;
     const id  = el.dataset.dbid||null;
     const cat = el.dataset.cat||'';
-    if(text) items.push({id,icon,text,sub:subText,assigned,assigned_to:assignedTo,category:cat});
+    const desc= el.dataset.desc||'';
+    if(text) items.push({id,icon,text,assigned,assigned_to:assignedTo,category:cat,description:desc});
   });
   return items;
 }
@@ -762,9 +784,11 @@ function closeIconPopup(){popup.classList.remove('open');ui.pickerTarget=null;}
 document.addEventListener('mousedown',e=>{if(!popup.contains(e.target))closeIconPopup();});
 
 function wireStaticIconBtns(){
-  document.getElementById('fIconBtn').addEventListener('click',e=>{e.stopPropagation();openIconPopup(e.currentTarget,ui.futureIcon,ic=>{ui.futureIcon=ic;document.getElementById('fIconDisp').textContent=ic;});});
-  document.getElementById('wishIconBtn').addEventListener('click',e=>{e.stopPropagation();openIconPopup(e.currentTarget,ui.wishIcon,ic=>{ui.wishIcon=ic;document.getElementById('wishIconDisp').textContent=ic;});});
-  document.getElementById('editIconBtn').addEventListener('click',e=>{e.stopPropagation();openIconPopup(e.currentTarget,editModal.icon,ic=>{editModal.icon=ic;document.getElementById('editIconDisp').textContent=ic;});});
+  // Populate all static category selects
+  populateCatSelect('futureCat','');
+  populateCatSelect('wishCat','');
+  // editModal close on backdrop
+  document.getElementById('editModal').addEventListener('mousedown',e=>{if(e.target===document.getElementById('editModal'))closeEditModal();});
 }
 
 /* ============================================================
@@ -817,25 +841,25 @@ function removeItem(btn){
   scheduleSave();
 }
 
-function makeLi(icon,who,text,cost,cat,dbid){
+function makeLi(icon,who,text,cost,cat,dbid,desc){
   const li=document.createElement('li');
   li.className='item-row';
   li.draggable=true;
-  li.dataset.icon=icon;li.dataset.who=who;li.dataset.cost=cost||'';li.dataset.cat=cat||'';
+  li.dataset.icon=icon||'✨';li.dataset.who=who;li.dataset.cost=cost||'';li.dataset.cat=cat||'';li.dataset.desc=desc||'';
   if(dbid)li.dataset.dbid=dbid;
-  const costHTML=(cost&&parseFloat(cost)>0)?`<span class="item-cost-tag">€${parseFloat(cost).toLocaleString('en-IE',{minimumFractionDigits:0,maximumFractionDigits:2})}</span>`:'';
+  const costHTML=(cost&&parseFloat(cost)>0)?`<div><span class="item-cost-tag">€${parseFloat(cost).toLocaleString('en-IE',{minimumFractionDigits:0,maximumFractionDigits:2})}</span></div>`:'';
+  const descHTML=desc?`<div class="item-desc">${desc}</div>`:'';
   li.innerHTML=`
     <span class="item-drag-handle" title="Drag to reorder">⠿</span>
-    <span class="item-icon">${icon}</span>
     <span class="item-dot ${who}"></span>
-    <div class="item-main"><span class="item-text">${text}</span>${catPillHTML(cat)}${costHTML}</div>
+    <div class="item-main">
+      <div class="item-top">${catPillHTML(cat)}<span class="item-text">${text}</span></div>
+      ${descHTML}${costHTML}
+    </div>
     <div class="item-actions">
-      <button class="item-colon" title="Options">∶</button>
       <button class="item-edit" onclick="openEditModal(this,'item')" title="Edit">✎</button>
       <button class="item-delete" onclick="removeItem(this)" title="Delete">×</button>
     </div>`;
-  li.querySelector('.item-colon').addEventListener('mousedown',e=>{e.stopPropagation();e.preventDefault();openCtxMenu(e,li,'item');});
-  // Desktop reorder drag
   li.addEventListener('dragstart',e=>{
     if(e.target.classList.contains('item-drag-handle')){
       ui.reorderDragEl=li;ui.dragId=null;
@@ -846,9 +870,7 @@ function makeLi(icon,who,text,cost,cat,dbid){
   li.addEventListener('dragover',e=>{if(!ui.reorderDragEl||ui.reorderDragEl===li)return;e.preventDefault();e.stopPropagation();const r=li.getBoundingClientRect(),mid=r.top+r.height/2;li.classList.remove('drag-target-above','drag-target-below');li.classList.add(e.clientY<mid?'drag-target-above':'drag-target-below');});
   li.addEventListener('dragleave',()=>li.classList.remove('drag-target-above','drag-target-below'));
   li.addEventListener('drop',e=>{if(!ui.reorderDragEl||ui.reorderDragEl===li)return;e.preventDefault();e.stopPropagation();const r=li.getBoundingClientRect(),mid=r.top+r.height/2,p=li.parentNode;if(e.clientY<mid)p.insertBefore(ui.reorderDragEl,li);else p.insertBefore(ui.reorderDragEl,li.nextSibling);li.classList.remove('drag-target-above','drag-target-below');scheduleSave();});
-  // Touch drag
   setupTouchDrag(li);
-  // Context menu
   li.addEventListener('contextmenu',e=>openCtxMenu(e,li,'item'));
   let lpt;
   li.addEventListener('touchstart',e=>{if(e.target.closest('.item-drag-handle,.item-actions'))return;lpt=setTimeout(()=>openCtxMenu(e,li,'item'),600);},{passive:true});
@@ -889,7 +911,7 @@ function setupTouchDrag(li){
 /* ============================================================
    EDIT MODAL
 ============================================================ */
-const editModal={targetEl:null,type:null,icon:'✨',who:'shared'};
+const editModal={targetEl:null,type:null,who:'shared'};
 
 function openEditModal(btn,type){
   const liEl=btn.closest?.('.item-row');
@@ -898,36 +920,35 @@ function openEditModal(btn,type){
   if(!el)return;
   const resolvedType=type||(liEl?'item':'wish');
   editModal.targetEl=el;editModal.type=resolvedType;
+  populateAssignSelect();
 
   if(resolvedType==='wish'){
     const wtEl=el.querySelector('.wish-text');
     const catPil=wtEl?.querySelector('.item-cat');
     const clean=catPil?(wtEl.textContent||'').replace(catPil.textContent,'').trim():(wtEl?.textContent.trim()||'');
-    editModal.icon=el.querySelector('.wish-icon')?.textContent.trim()||'🌟';editModal.who='shared';
+    editModal.who='shared';
     document.getElementById('editModalTitle').textContent='Edit wish item';
-    document.getElementById('editIconDisp').textContent=editModal.icon;
     document.getElementById('editText').value=clean;
-    document.getElementById('editCC').checked=false;document.getElementById('editCW').classList.remove('show');
+    document.getElementById('editDesc').value=el.dataset.desc||'';
+    document.getElementById('editCC').checked=false;
+    document.getElementById('editCW').classList.remove('show');
     document.getElementById('editWhoGroup').style.display='none';
-    document.getElementById('editAssignRow').style.display='block';
-    populateCatSelect('editCatSelect',el.dataset.cat||'');populateAssignSelect();
+    populateCatSelect('editCatSelect',el.dataset.cat||'');
     document.getElementById('editAssignSelect').value='';
   }else{
-    editModal.icon=el.dataset.icon||'✨';editModal.who=el.dataset.who||'shared';
+    editModal.who=el.dataset.who||'shared';
     const text=el.querySelector('.item-text')?.textContent.trim()||'';
     const cost=el.dataset.cost||'';
-    const isFuture=!!el.closest('#futureList');
     document.getElementById('editModalTitle').textContent='Edit item';
-    document.getElementById('editIconDisp').textContent=editModal.icon;
     document.getElementById('editText').value=text;
+    document.getElementById('editDesc').value=el.dataset.desc||'';
     document.getElementById('editCC').checked=!!(cost&&parseFloat(cost)>0);
     document.getElementById('editCA').value=cost||'';
     document.getElementById('editCW').classList.toggle('show',!!(cost&&parseFloat(cost)>0));
     document.getElementById('editWhoGroup').style.display='flex';
     setEditWho(editModal.who);
     populateCatSelect('editCatSelect',el.dataset.cat||'');
-    document.getElementById('editAssignRow').style.display=isFuture?'block':'none';
-    if(isFuture){populateAssignSelect();document.getElementById('editAssignSelect').value='';}
+    document.getElementById('editAssignSelect').value='';
   }
   document.getElementById('editModal').classList.add('open');
 }
@@ -939,25 +960,31 @@ function toggleEditCost(){document.getElementById('editCW').classList.toggle('sh
 function saveEditModal(){
   const el=editModal.targetEl;if(!el)return;
   const text=document.getElementById('editText').value.trim();if(!text)return;
+  const desc=document.getElementById('editDesc').value.trim();
   const catName=document.getElementById('editCatSelect').value;
   const assignTo=document.getElementById('editAssignSelect').value;
   const c=catName?CATEGORIES.find(x=>x.name===catName):null;
-  const newIcon=c?c.icon:editModal.icon;
+  // Icon is now category icon or keep existing
+  const newIcon=c?c.icon:(el.dataset.icon||'✨');
 
   if(editModal.type==='wish'){
+    el.dataset.cat=catName;el.dataset.icon=newIcon;el.dataset.desc=desc;
     el.querySelector('.wish-icon').textContent=newIcon;
-    el.dataset.cat=catName;el.dataset.icon=newIcon;
     const wtEl=el.querySelector('.wish-text');
     const old=wtEl?.querySelector('.item-cat');if(old)old.remove();
     wtEl.textContent=text;
     if(c){const pill=document.createElement('span');pill.className='item-cat';pill.style.cssText=`background:${c.bg};color:${c.fg}`;pill.textContent=`${c.icon} ${c.name}`;wtEl.appendChild(pill);}
+    // Update description
+    let descEl=el.querySelector('.wish-desc');
+    if(desc){if(!descEl){descEl=document.createElement('div');descEl.className='wish-desc';el.querySelector('.wish-text')?.after(descEl);}descEl.textContent=desc;}
+    else if(descEl){descEl.remove();}
     if(assignTo){
       if(assignTo==='someday'){
-        document.getElementById('futureList').appendChild(makeLi(newIcon,'shared',text,null,catName));
+        document.getElementById('futureList').appendChild(makeLi(newIcon,'shared',text,null,catName,null,desc));
         updateWishBadge(el,'Someday');
       }else{
         const n=parseInt(assignTo),ty=yearOfMonth(n);
-        const doIt=()=>{const list=document.getElementById('list-'+n);if(list){list.appendChild(makeLi(newIcon,'shared',text,null,catName));document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open');}updateWishBadge(el,monthName(n));};
+        const doIt=()=>{const list=document.getElementById('list-'+n);if(list){list.appendChild(makeLi(newIcon,'shared',text,null,catName,null,desc));document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open');}updateWishBadge(el,monthName(n));};
         if(ty!==activeYear){switchYear(ty);setTimeout(doIt,60);}else doIt();
       }
     }
@@ -965,23 +992,38 @@ function saveEditModal(){
     const chk=document.getElementById('editCC');
     const cost=chk.checked?document.getElementById('editCA').value:null;
     const who=editModal.who;
-    el.dataset.icon=newIcon;el.dataset.who=who;el.dataset.cost=cost||'';el.dataset.cat=catName;
-    el.querySelector('.item-icon').textContent=newIcon;
+    el.dataset.icon=newIcon;el.dataset.who=who;el.dataset.cost=cost||'';el.dataset.cat=catName;el.dataset.desc=desc;
+    // Update text
     el.querySelector('.item-text').textContent=text;
+    // Update dot
     const oldDot=el.querySelector('.item-dot');if(oldDot)oldDot.className=`item-dot ${who}`;
-    const oldCost=el.querySelector('.item-cost-tag');if(oldCost)oldCost.remove();
-    if(cost&&parseFloat(cost)>0){const tag=document.createElement('span');tag.className='item-cost-tag';tag.textContent=`€${parseFloat(cost).toLocaleString('en-IE',{minimumFractionDigits:0,maximumFractionDigits:2})}`;el.querySelector('.item-main').appendChild(tag);}
-    const oldCat=el.querySelector('.item-cat');if(oldCat)oldCat.remove();
-    if(c){const pill=document.createElement('span');pill.className='item-cat';pill.style.cssText=`background:${c.bg};color:${c.fg}`;pill.textContent=`${c.icon} ${c.name}`;el.querySelector('.item-text').insertAdjacentElement('afterend',pill);}
+    // Update cat pill (now lives in item-top before text)
+    const topEl=el.querySelector('.item-top');
+    const oldCat=topEl?.querySelector('.item-cat');if(oldCat)oldCat.remove();
+    if(c&&topEl){const pill=document.createElement('span');pill.className='item-cat';pill.style.cssText=`background:${c.bg};color:${c.fg}`;pill.textContent=`${c.icon} ${c.name}`;topEl.insertBefore(pill,topEl.firstChild);}
+    // Update desc
+    let descEl=el.querySelector('.item-desc');
+    if(desc){if(!descEl){descEl=document.createElement('div');descEl.className='item-desc';el.querySelector('.item-top')?.after(descEl);}descEl.textContent=desc;}
+    else if(descEl){descEl.remove();}
+    // Update cost
+    const costWrap=el.querySelector('.item-cost-tag')?.parentElement;
+    if(costWrap&&costWrap.tagName==='DIV')costWrap.remove();
+    if(cost&&parseFloat(cost)>0){const wrap=document.createElement('div');const tag=document.createElement('span');tag.className='item-cost-tag';tag.textContent=`€${parseFloat(cost).toLocaleString('en-IE',{minimumFractionDigits:0,maximumFractionDigits:2})}`;wrap.appendChild(tag);el.querySelector('.item-main').appendChild(wrap);}
+    // Move if reassigned
     if(assignTo&&assignTo!==''){
-      if(assignTo==='someday'){el.remove();document.getElementById('futureList').appendChild(makeLi(newIcon,who,text,cost,catName));}
-      else{const n=parseInt(assignTo),ty=yearOfMonth(n),item={icon:newIcon,who,text,cost,cat:catName};el.remove();const doMove=()=>{const list=document.getElementById('list-'+n);if(list){list.appendChild(makeLi(item.icon,item.who,item.text,item.cost,item.cat));document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open');}};if(ty!==activeYear){switchYear(ty);setTimeout(doMove,60);}else doMove();}
+      const itemData={icon:newIcon,who,text,cost,cat:catName,desc};
+      el.remove();
+      if(assignTo==='someday'){
+        document.getElementById('futureList').appendChild(makeLi(itemData.icon,itemData.who,itemData.text,itemData.cost,itemData.cat,null,itemData.desc));
+      }else{
+        const n=parseInt(assignTo),ty=yearOfMonth(n);
+        const doMove=()=>{const list=document.getElementById('list-'+n);if(list){list.appendChild(makeLi(itemData.icon,itemData.who,itemData.text,itemData.cost,itemData.cat,null,itemData.desc));document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open');}};
+        if(ty!==activeYear){switchYear(ty);setTimeout(doMove,60);}else doMove();
+      }
     }
   }
   closeEditModal();scheduleSave();
 }
-
-document.getElementById('editModal').addEventListener('mousedown',e=>{if(e.target===document.getElementById('editModal'))closeEditModal();});
 
 /* ============================================================
    CONTEXT MENU
@@ -1057,13 +1099,13 @@ function ctxMoveToMonth(n){
   if(ctx.type==='wish'){
     const wtEl=el.querySelector('.wish-text');const catPil=wtEl?.querySelector('.item-cat');
     const clean=catPil?(wtEl.textContent||'').replace(catPil.textContent,'').trim():(wtEl?.textContent.trim()||'');
-    const icon=el.querySelector('.wish-icon')?.textContent.trim()||'🌟';const cat=el.dataset.cat||'';
-    const doIt=()=>{const list=document.getElementById('list-'+n);if(list){list.appendChild(makeLi(icon,'shared',clean,null,cat));document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open');}updateWishBadge(el,monthName(n));scheduleSave();};
+    const icon=el.querySelector('.wish-icon')?.textContent.trim()||'🌟';const cat=el.dataset.cat||'';const desc=el.dataset.desc||'';
+    const doIt=()=>{const list=document.getElementById('list-'+n);if(list){list.appendChild(makeLi(icon,'shared',clean,null,cat,'',desc));document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open');}updateWishBadge(el,monthName(n));scheduleSave();};
     if(ty!==activeYear){switchYear(ty);setTimeout(doIt,60);}else doIt();
   }else{
-    const item={icon:el.dataset.icon||'✨',who:el.dataset.who||'shared',text:el.querySelector('.item-text')?.textContent.trim()||'',cost:el.dataset.cost||null,cat:el.dataset.cat||''};
+    const item={icon:el.dataset.icon||'✨',who:el.dataset.who||'shared',text:el.querySelector('.item-text')?.textContent.trim()||'',cost:el.dataset.cost||null,cat:el.dataset.cat||'',desc:el.dataset.desc||''};
     el.remove();
-    const doMove=()=>{const list=document.getElementById('list-'+n);if(list){list.appendChild(makeLi(item.icon,item.who,item.text,item.cost,item.cat));document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open');}scheduleSave();};
+    const doMove=()=>{const list=document.getElementById('list-'+n);if(list){list.appendChild(makeLi(item.icon,item.who,item.text,item.cost,item.cat,'',item.desc));document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open');}scheduleSave();};
     if(ty!==activeYear){switchYear(ty);setTimeout(doMove,60);}else doMove();
   }
 }
@@ -1073,11 +1115,11 @@ function ctxMoveToFuture(){
   if(ctx.type==='wish'){
     const wtEl=el.querySelector('.wish-text');const catPil=wtEl?.querySelector('.item-cat');
     const clean=catPil?(wtEl.textContent||'').replace(catPil.textContent,'').trim():(wtEl?.textContent.trim()||'');
-    document.getElementById('futureList').appendChild(makeLi(el.querySelector('.wish-icon')?.textContent.trim()||'🌟','shared',clean,null,el.dataset.cat||''));
+    document.getElementById('futureList').appendChild(makeLi(el.querySelector('.wish-icon')?.textContent.trim()||'🌟','shared',clean,null,el.dataset.cat||'','',el.dataset.desc||''));
     updateWishBadge(el,'Someday');
   }else{
-    const item={icon:el.dataset.icon||'✨',who:el.dataset.who||'shared',text:el.querySelector('.item-text')?.textContent.trim()||'',cost:el.dataset.cost||null,cat:el.dataset.cat||''};
-    el.remove();document.getElementById('futureList').appendChild(makeLi(item.icon,item.who,item.text,item.cost,item.cat));
+    const item={icon:el.dataset.icon||'✨',who:el.dataset.who||'shared',text:el.querySelector('.item-text')?.textContent.trim()||'',cost:el.dataset.cost||null,cat:el.dataset.cat||'',desc:el.dataset.desc||''};
+    el.remove();document.getElementById('futureList').appendChild(makeLi(item.icon,item.who,item.text,item.cost,item.cat,'',item.desc));
   }
   scheduleSave();
 }
@@ -1086,10 +1128,12 @@ function ctxSetCategory(catName){
   const el=ctx.target;if(!el)return;closeCtxMenu();
   el.dataset.cat=catName;const c=catName?CATEGORIES.find(x=>x.name===catName):null;
   const newIcon=c?c.icon:(el.dataset.icon||'✨');
+  el.dataset.icon=newIcon;
   if(ctx.type==='item'){
-    el.querySelector('.item-icon').textContent=newIcon;el.dataset.icon=newIcon;
-    const old=el.querySelector('.item-cat');if(old)old.remove();
-    if(c){const pill=document.createElement('span');pill.className='item-cat';pill.style.cssText=`background:${c.bg};color:${c.fg}`;pill.textContent=`${c.icon} ${c.name}`;el.querySelector('.item-text').insertAdjacentElement('afterend',pill);}
+    // Update cat pill in item-top
+    const topEl=el.querySelector('.item-top');
+    const old=topEl?.querySelector('.item-cat');if(old)old.remove();
+    if(c&&topEl){const pill=document.createElement('span');pill.className='item-cat';pill.style.cssText=`background:${c.bg};color:${c.fg}`;pill.textContent=`${c.icon} ${c.name}`;topEl.insertBefore(pill,topEl.firstChild);}
   }else{
     el.querySelector('.wish-icon').textContent=newIcon;
     const old=el.querySelector('.item-cat');if(old)old.remove();
@@ -1106,8 +1150,12 @@ function setFWho(w){ui.futureWho=w;['ryan','louise','shared'].forEach(x=>documen
 function addFuture(){
   const inp=document.getElementById('futureInput');const txt=inp.value.trim();if(!txt)return;
   const chk=document.getElementById('fCC');const cost=chk.checked?document.getElementById('fCA').value:null;
-  document.getElementById('futureList').appendChild(makeLi(ui.futureIcon,ui.futureWho,txt,cost,''));
-  inp.value='';document.getElementById('fCA').value='';chk.checked=false;document.getElementById('fCW').classList.remove('show');
+  const cat=document.getElementById('futureCat').value;
+  const desc=document.getElementById('futureDesc').value.trim();
+  const icon=cat?(CATEGORIES.find(x=>x.name===cat)?.icon||'✨'):'✨';
+  document.getElementById('futureList').appendChild(makeLi(icon,ui.futureWho,txt,cost,cat,'',desc));
+  inp.value='';document.getElementById('futureDesc').value='';document.getElementById('futureCat').value='';
+  document.getElementById('fCA').value='';chk.checked=false;document.getElementById('fCW').classList.remove('show');
   scheduleSave();
 }
 
@@ -1117,13 +1165,13 @@ function futureDrop(e){
   document.getElementById('futureCard').classList.remove('drag-over');
   if(!ui.dragId||ui.reorderDragEl)return;e.preventDefault();
   const wish=getWishById(ui.dragId);if(!wish)return;
-  document.getElementById('futureList').appendChild(makeLi(wish.icon,'shared',wish.text,null,wish.cat||''));
+  document.getElementById('futureList').appendChild(makeLi(wish.icon,'shared',wish.text,null,wish.cat||'','',wish.desc||''));
   assignWish(ui.dragId,'Someday');ui.dragId=null;scheduleSave();
 }
 
 function buildFutureList(items){
   const list=document.getElementById('futureList');list.innerHTML='';
-  (items||[]).forEach(item=>list.appendChild(makeLi(item.icon||'✨',item.who||'shared',item.text,item.cost,item.category||'',item.id)));
+  (items||[]).forEach(item=>list.appendChild(makeLi(item.icon||'✨',item.who||'shared',item.text,item.cost,item.category||'',item.id,item.description||item.desc||'')));
 }
 
 /* ============================================================
@@ -1134,9 +1182,14 @@ function setMWho(n,w){ui.monthWho[n]=w;['ryan','louise','shared'].forEach(x=>doc
 function addMonthItem(n){
   const inp=document.getElementById('inp-'+n);const txt=inp.value.trim();if(!txt)return;
   const chk=document.getElementById('cc-'+n);const cost=chk.checked?document.getElementById('ca-'+n).value:null;
-  document.getElementById('list-'+n).appendChild(makeLi(ui.monthIcon[n]||'✨',ui.monthWho[n]||'shared',txt,cost,''));
+  const cat=document.getElementById('mcat-'+n)?.value||'';
+  const desc=document.getElementById('mdesc-'+n)?.value.trim()||'';
+  const icon=cat?(CATEGORIES.find(x=>x.name===cat)?.icon||'✨'):'✨';
+  document.getElementById('list-'+n).appendChild(makeLi(icon,ui.monthWho[n]||'shared',txt,cost,cat,'',desc));
   document.querySelector(`[data-month="${n}"]`).classList.add('has-content','open');
-  inp.value='';document.getElementById('ca-'+n).value='';chk.checked=false;document.getElementById('cw-'+n).classList.remove('show');
+  inp.value='';if(document.getElementById('mdesc-'+n))document.getElementById('mdesc-'+n).value='';
+  if(document.getElementById('mcat-'+n))document.getElementById('mcat-'+n).value='';
+  document.getElementById('ca-'+n).value='';chk.checked=false;document.getElementById('cw-'+n).classList.remove('show');
   scheduleSave();
 }
 
@@ -1219,8 +1272,11 @@ function buildMonthCard(grid,n,savedItems){
       <ul class="items-list" id="list-${n}"></ul>
       <div class="add-form">
         <div class="add-row1">
-          <button class="icon-picker-btn" data-mn="${n}"><span class="mIconDisp">✨</span></button>
           <input class="add-input" id="inp-${n}" placeholder="Add something to ${name}…" onkeydown="if(event.key==='Enter')addMonthItem(${n})">
+        </div>
+        <input class="add-desc-input" id="mdesc-${n}" placeholder="Description (optional)…">
+        <div class="add-row-cat">
+          <select class="add-cat-select" id="mcat-${n}"><option value="">No category</option></select>
         </div>
         <div class="add-row2">
           <div class="who-group">
@@ -1235,21 +1291,21 @@ function buildMonthCard(grid,n,savedItems){
       </div>
     </div>`;
 
-  const iconBtn=card.querySelector('[data-mn]');const iconDisp=card.querySelector('.mIconDisp');
-  iconBtn.addEventListener('click',e=>{e.stopPropagation();openIconPopup(iconBtn,ui.monthIcon[n],ic=>{ui.monthIcon[n]=ic;iconDisp.textContent=ic;});});
+  // Populate category select
+  populateCatSelect('mcat-'+n,'');
 
   card.addEventListener('dragover',e=>{if(ui.reorderDragEl||!ui.dragId)return;e.preventDefault();card.classList.add('drag-over');});
   card.addEventListener('dragleave',e=>{if(!card.contains(e.relatedTarget))card.classList.remove('drag-over');});
   card.addEventListener('drop',e=>{
     card.classList.remove('drag-over');if(ui.reorderDragEl||!ui.dragId)return;e.preventDefault();
     const wish=getWishById(ui.dragId);if(!wish)return;
-    document.getElementById('list-'+n).appendChild(makeLi(wish.icon,'shared',wish.text,null,wish.cat||''));
+    document.getElementById('list-'+n).appendChild(makeLi(wish.icon,'shared',wish.text,null,wish.cat||'','',wish.desc||''));
     card.classList.add('has-content','open');assignWish(ui.dragId,name);ui.dragId=null;scheduleSave();
   });
 
   grid.appendChild(card);
   const list=document.getElementById('list-'+n);
-  savedItems.forEach(item=>list.appendChild(makeLi(item.icon||'✨',item.who||'shared',item.text,item.cost,item.category||item.cat||'',item.id)));
+  savedItems.forEach(item=>list.appendChild(makeLi(item.icon||'✨',item.who||'shared',item.text,item.cost,item.category||item.cat||'',item.id,item.description||item.desc||'')));
 }
 
 /* ============================================================
@@ -1259,7 +1315,7 @@ function getWishById(id){
   const el=document.querySelector(`[data-wish="${id}"]`);if(!el)return null;
   const wtEl=el.querySelector('.wish-text');const catPil=wtEl?.querySelector('.item-cat');
   const text=catPil?(wtEl.textContent||'').replace(catPil.textContent,'').trim():(wtEl?.textContent.trim()||'');
-  return{id,icon:el.querySelector('.wish-icon')?.textContent.trim()||'🌟',text,cat:el.dataset.cat||''};
+  return{id,icon:el.querySelector('.wish-icon')?.textContent.trim()||'🌟',text,cat:el.dataset.cat||'',desc:el.dataset.desc||''};
 }
 
 function assignWish(id,where){
@@ -1272,46 +1328,58 @@ function removeWish(btn){btn.closest('.wish-item').remove();scheduleSave();}
 function makeWishEl(w){
   const div=document.createElement('div');
   div.className='wish-item'+(w.assigned?' assigned':'');
-  div.dataset.wish=w.id;div.dataset.cat=w.category||w.cat||'';
-  if(w.id&&w.id.toString().includes('-'))div.dataset.dbid=w.id; // uuid from DB
+  div.dataset.wish=w.id;div.dataset.cat=w.category||w.cat||'';div.dataset.desc=w.description||w.desc||'';
+  if(w.id&&w.id.toString().includes('-'))div.dataset.dbid=w.id;
   div.draggable=true;
-  const sub=(w.assigned&&w.assigned_to)?`<span class="wish-badge">Added to ${w.assigned_to}</span>`:`<span class="wish-sub">${w.sub||'Drag to a month or use ∶'}</span>`;
   const cat=w.category||w.cat||'';
   const catBadge=cat?(()=>{const c=CATEGORIES.find(x=>x.name===cat);return c?`<span class="item-cat" style="background:${c.bg};color:${c.fg}">${c.icon} ${c.name}</span>`:''})():'';
+  const badge=(w.assigned&&w.assigned_to)?`<span class="wish-badge">Added to ${w.assigned_to}</span>`:'';
+  const desc=w.description||w.desc||'';
+  const descHTML=desc?`<div class="wish-desc">${desc}</div>`:'';
   div.innerHTML=`
     <span class="wish-icon">${w.icon}</span>
     <div style="flex:1;min-width:0">
       <div class="wish-text">${w.text}${catBadge}</div>
-      <div>${sub}</div>
+      ${descHTML}
+      ${badge}
     </div>
-    <button class="item-edit" title="Edit" onclick="openEditModal(this,'wish')">✎</button>
-    <button class="wish-colon" title="Options">∶</button>
-    <button class="wish-delete" onclick="removeWish(this)">×</button>`;
-  div.querySelector('.wish-colon').addEventListener('mousedown',e=>{e.stopPropagation();e.preventDefault();openCtxMenu(e,div,'wish');});
-  div.addEventListener('dragstart',e=>{if(e.target.closest('.wish-colon,.wish-delete,.item-edit')){e.preventDefault();return;}ui.dragId=w.id;ui.reorderDragEl=null;div.classList.add('dragging');e.dataTransfer.effectAllowed='copy';});
+    <div class="wish-actions">
+      <button class="wish-edit" title="Edit" onclick="openEditModal(this,'wish')">✎</button>
+      <button class="wish-delete" onclick="removeWish(this)">×</button>
+    </div>`;
+  div.addEventListener('dragstart',e=>{
+    if(e.target.closest('.wish-actions')){e.preventDefault();return;}
+    ui.dragId=w.id;ui.reorderDragEl=null;div.classList.add('dragging');e.dataTransfer.effectAllowed='copy';
+  });
   div.addEventListener('dragend',()=>div.classList.remove('dragging'));
   div.addEventListener('contextmenu',e=>{e.preventDefault();openCtxMenu(e,div,'wish');});
   let lpt;
-  div.addEventListener('touchstart',e=>{if(e.target.closest('.wish-colon,.wish-delete,.item-edit'))return;lpt=setTimeout(()=>openCtxMenu(e,div,'wish'),600);},{passive:true});
+  div.addEventListener('touchstart',e=>{if(e.target.closest('.wish-actions'))return;lpt=setTimeout(()=>openCtxMenu(e,div,'wish'),600);},{passive:true});
   div.addEventListener('touchend',()=>clearTimeout(lpt));div.addEventListener('touchmove',()=>clearTimeout(lpt));
   return div;
 }
 
 function addWishItem(){
   const inp=document.getElementById('wishInput');const txt=inp.value.trim();if(!txt)return;
-  const w={id:'w_'+Date.now(),icon:ui.wishIcon,text:txt,sub:'Drag to a month or use ∶',assigned:false,assigned_to:null,category:''};
+  const cat=document.getElementById('wishCat')?.value||'';
+  const desc=document.getElementById('wishDesc')?.value.trim()||'';
+  const icon=cat?(CATEGORIES.find(x=>x.name===cat)?.icon||'🌟'):'🌟';
+  const w={id:'w_'+Date.now(),icon,text:txt,assigned:false,assigned_to:null,category:cat,desc};
   document.getElementById('wishGrid').appendChild(makeWishEl(w));
-  inp.value='';scheduleSave();
+  inp.value='';
+  if(document.getElementById('wishDesc'))document.getElementById('wishDesc').value='';
+  if(document.getElementById('wishCat'))document.getElementById('wishCat').value='';
+  scheduleSave();
 }
 
 function buildWishlist(items){
   const grid=document.getElementById('wishGrid');grid.innerHTML='';
   const defaults=[
-    {id:'w1',icon:'✈️',text:'South-East Asia trip',assigned:false,assigned_to:null,category:'Holiday'},
-    {id:'w2',icon:'🏠',text:'Buy a house',assigned:false,assigned_to:null,category:'Home'},
-    {id:'w3',icon:'💍',text:'Get engaged or married',assigned:false,assigned_to:null,category:''},
-    {id:'w4',icon:'🛠️',text:'Build GetDocket',assigned:false,assigned_to:null,category:'Project'},
-    {id:'w5',icon:'📖',text:'Write a novel',assigned:false,assigned_to:null,category:'Creative'},
+    {id:'w1',icon:'✈️',text:'South-East Asia trip',assigned:false,assigned_to:null,category:'Holiday',desc:''},
+    {id:'w2',icon:'🏠',text:'Buy a house',assigned:false,assigned_to:null,category:'Home',desc:''},
+    {id:'w3',icon:'💍',text:'Get engaged or married',assigned:false,assigned_to:null,category:'',desc:''},
+    {id:'w4',icon:'🛠️',text:'Build GetDocket',assigned:false,assigned_to:null,category:'Project',desc:''},
+    {id:'w5',icon:'📖',text:'Write a novel',assigned:false,assigned_to:null,category:'Creative',desc:''},
   ];
   (items&&items.length?items:defaults).forEach(w=>grid.appendChild(makeWishEl(w)));
 }
