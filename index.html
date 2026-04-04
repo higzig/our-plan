@@ -461,6 +461,16 @@ const ui={
 /* ============================================================
    MAGIC LINK AUTH
 ============================================================ */
+/* ============================================================
+   NOTE: Allowed emails hardcoded here for the pre-auth check.
+   REMOVE and replace with DB lookup via service role or
+   onboarding flow before going public.
+============================================================ */
+const ALLOWED_EMAILS = [
+  'higginsr@protonmail.com',
+  'louisedorgan78@gmail.com'
+];
+
 async function sendMagicLink() {
   const email = document.getElementById('gateEmail').value.trim().toLowerCase();
   if (!email) return;
@@ -470,11 +480,8 @@ async function sendMagicLink() {
   errEl.style.display='none'; okEl.style.display='none';
   btn.disabled=true; btn.textContent='Sending…';
 
-  // Check email is on the approved list
-  const {data:members} = await sb.from('couple_members').select('email').eq('couple_id',COUPLE_ID);
-  const allowed = members?.map(m=>m.email.toLowerCase())||[];
-  if (!allowed.includes(email)) {
-    errEl.textContent="That email isn't on the list. Ask Ryan to add you.";
+  if (!ALLOWED_EMAILS.includes(email)) {
+    errEl.textContent="That email isn't on the list.";
     errEl.style.display='block';
     btn.disabled=false; btn.textContent='Send me a link';
     return;
