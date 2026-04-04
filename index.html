@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Responsibilities, Made Fun</title>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<!-- Supabase JS v2 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
     --cream:#FAF7F2;--warm-white:#FFFDF9;--ink:#1C1A17;--ink-light:#5C574F;--ink-faint:#A09890;
@@ -25,15 +27,26 @@
   .gate-input:focus{border-color:var(--ryan);}
   .gate-btn{width:100%;padding:12px;border-radius:10px;border:none;background:var(--ink);color:var(--cream);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s;}
   .gate-btn:hover{background:var(--ryan);}
-  .gate-error{font-size:13px;color:var(--louise);margin-top:10px;display:none;}
+  .gate-btn:disabled{opacity:0.6;cursor:not-allowed;}
+  .gate-error{font-size:13px;color:var(--louise);margin-top:10px;}
+  .gate-success{font-size:13px;color:#2d6e35;margin-top:10px;font-style:italic;}
   #gate.hidden{display:none;}
+
+  /* PRESENCE */
+  .presence-bar{position:fixed;top:12px;right:16px;z-index:600;display:flex;gap:8px;align-items:center;}
+  .presence-pill{display:flex;align-items:center;gap:6px;background:var(--warm-white);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--ink-light);box-shadow:var(--shadow);transition:opacity 0.3s;}
+  .presence-dot{width:7px;height:7px;border-radius:50%;animation:pulse 2s infinite;}
+  .presence-dot.ryan{background:var(--ryan);}
+  .presence-dot.louise{background:var(--louise);}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+  .user-pill{background:var(--warm-white);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--ink-faint);box-shadow:var(--shadow);cursor:pointer;transition:all 0.15s;}
+  .user-pill:hover{border-color:var(--louise);color:var(--louise);}
 
   /* HEADER */
   .header{text-align:center;padding:56px 0 48px;border-bottom:1px solid var(--border);margin-bottom:48px;}
   .header h1{font-family:'Lora',serif;font-size:clamp(28px,5vw,44px);font-weight:600;color:var(--ink);line-height:1.2;margin-bottom:8px;}
   .header h1 .accent{color:var(--louise);}
   .header-tagline{font-family:'Lora',serif;font-style:italic;font-size:14px;color:var(--ink-faint);margin-bottom:14px;}
-  .header-sub{font-size:15px;color:var(--ink-light);font-weight:300;line-height:1.6;max-width:480px;margin:0 auto;}
   .header-date{margin-top:18px;font-size:12px;color:var(--ink-faint);letter-spacing:0.08em;}
   .reset-btn{margin-top:16px;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:11px;color:var(--ink-faint);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
   .reset-btn:hover{border-color:var(--louise);color:var(--louise);}
@@ -91,20 +104,22 @@
   .item-drag-handle:active{cursor:grabbing;}
   .item-row.dragging-item{opacity:0.35;background:var(--gold-light);border-radius:8px;}
   .item-row.drag-target-above{border-top:2px solid var(--gold);}
-  .item-row.drag-target-below{border-bottom:2px solid var(--gold);}
+  .item-row.drag-target-below{border-bottom:2px solid var(--gold) !important;}
   .item-actions{display:flex;gap:4px;flex-shrink:0;opacity:0;transition:opacity 0.15s;}
   .item-row:hover .item-actions{opacity:1;}
   @media(max-width:768px){.item-actions{opacity:1;}}
   .item-edit{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:13px;line-height:1;padding:2px 4px;border-radius:4px;transition:color 0.15s;}
   .item-edit:hover{color:var(--ryan);}
   .wish-item .item-edit{opacity:0;transition:opacity 0.15s,color 0.15s;}
-  .wish-item:hover .item-edit{opacity:1;}
-  @media(max-width:768px){.wish-item .item-edit{opacity:1;}}
+  .wish-item:hover .item-edit,.wish-item .item-edit{opacity:1;}
   .item-delete{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:15px;line-height:1;padding:2px 4px;border-radius:4px;transition:color 0.15s;}
   .item-delete:hover{color:var(--louise);}
+  .item-colon{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:14px;font-weight:700;line-height:1;padding:2px 5px;border-radius:4px;transition:all 0.15s;flex-shrink:0;}
+  .item-colon:hover{background:var(--ryan-light);color:var(--ryan);}
+  .item-cat{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:500;padding:1px 7px;border-radius:12px;margin-left:6px;vertical-align:middle;}
 
   /* EDIT MODAL */
-  #editModal{display:none;position:fixed;inset:0;z-index:2000;background:rgba(28,26,23,0.45);align-items:center;justify-content:center;padding:20px;}
+  #editModal{display:none;position:fixed;inset:0;z-index:2000;background:rgba(28,26,23,0.45);align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
   #editModal.open{display:flex;}
   .edit-box{background:var(--warm-white);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:420px;width:100%;box-shadow:0 12px 48px rgba(28,26,23,0.2);}
   .edit-title{font-family:'Lora',serif;font-size:16px;font-weight:600;margin-bottom:18px;color:var(--ink);}
@@ -112,8 +127,10 @@
   .edit-input{flex:1;background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;}
   .edit-input:focus{border-color:var(--ryan);}
   .edit-who-group{display:flex;gap:4px;margin-bottom:10px;}
-  .edit-cost-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
-  .edit-actions{display:flex;gap:8px;justify-content:flex-end;}
+  .edit-cost-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+  .edit-section-label{font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px;}
+  .edit-select{width:100%;background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;cursor:pointer;margin-bottom:12px;}
+  .edit-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:4px;}
   .edit-save{padding:8px 20px;border-radius:8px;border:none;background:var(--ink);color:var(--cream);font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s;}
   .edit-save:hover{background:var(--ryan);}
   .edit-cancel{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--ink-light);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
@@ -125,18 +142,14 @@
   .add-input{flex:1;background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;transition:border-color 0.2s;}
   .add-input:focus{border-color:var(--ryan);}
   .add-input::placeholder{color:var(--ink-faint);font-style:italic;}
-
-  /* ICON BUTTON — popup is appended to body, positioned via JS */
   .icon-picker-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--cream);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color 0.15s;}
   .icon-picker-btn:hover{border-color:var(--ryan);}
-  /* single floating popup reused for all pickers */
   #iconPopup{display:none;position:fixed;z-index:9999;background:var(--warm-white);border:1px solid var(--border);border-radius:10px;padding:10px;box-shadow:0 8px 24px rgba(28,26,23,0.18);width:236px;}
   #iconPopup.open{display:block;}
   .icon-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
   .icon-opt{width:30px;height:30px;border-radius:6px;border:none;background:none;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.1s;}
   .icon-opt:hover{background:var(--cream);}
   .icon-opt.sel{background:var(--ryan-light);}
-
   .add-row2{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .who-group{display:flex;gap:4px;}
   .who-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--cream);font-size:11px;font-weight:500;cursor:pointer;letter-spacing:0.05em;transition:all 0.15s;color:var(--ink-light);}
@@ -154,8 +167,8 @@
   .add-btn:hover{background:var(--ryan);}
 
   /* YEAR TABS */
-  .year-tabs{display:flex;align-items:center;gap:0;margin-bottom:20px;background:var(--warm-white);border:1px solid var(--border);border-radius:10px;padding:4px;width:fit-content;}
-  .year-tab{padding:7px 20px;border-radius:7px;border:none;background:transparent;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--ink-faint);transition:all 0.15s;letter-spacing:0.02em;}
+  .year-tabs{display:flex;align-items:center;background:var(--warm-white);border:1px solid var(--border);border-radius:10px;padding:4px;width:fit-content;}
+  .year-tab{padding:7px 20px;border-radius:7px;border:none;background:transparent;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--ink-faint);transition:all 0.15s;}
   .year-tab.active{background:var(--ink);color:var(--cream);}
   .year-tab.active.y2{background:var(--ryan);}
   .months-controls{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
@@ -165,14 +178,8 @@
   .month-mgmt-btn:hover{border-color:var(--ryan);color:var(--ryan);}
   .month-mgmt-btn.remove:hover{border-color:var(--louise);color:var(--louise);}
   .month-mgmt-btn:disabled{opacity:0.35;cursor:not-allowed;}
-  .month-mgmt-btn:disabled:hover{border-color:var(--border);color:var(--ink-light);}
-  /* month header delete btn */
   .month-remove-btn{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:12px;padding:4px 6px;border-radius:4px;margin-left:4px;transition:color 0.15s;line-height:1;opacity:0.5;}
   .month-remove-btn:hover{color:var(--louise);opacity:1;}
-
-  /* COLON BUTTON on items and wish cards */
-  .item-colon{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:12px;font-weight:700;line-height:1;padding:2px 5px;border-radius:4px;transition:all 0.15s;letter-spacing:-1px;flex-shrink:0;}
-  .item-colon:hover{background:var(--ryan-light);color:var(--ryan);}
 
   /* CONTEXT MENU */
   #ctxMenu{display:none;position:fixed;z-index:9998;background:var(--warm-white);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 32px rgba(28,26,23,0.18);width:260px;max-height:80vh;overflow:hidden;flex-direction:column;}
@@ -186,8 +193,8 @@
   .ctx-item.ctx-delete{color:var(--louise);}
   .ctx-item.ctx-delete:hover{background:var(--louise-light);}
   .ctx-divider{height:1px;background:var(--border);margin:3px 0;}
-  /* Category pill on items */
-  .item-cat{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:500;padding:1px 7px;border-radius:12px;margin-left:6px;vertical-align:middle;}
+
+  /* FUTURE / SOMEDAY */
   .future-section{margin-bottom:48px;}
   .future-card{background:var(--warm-white);border:1px solid var(--border);border-radius:12px;padding:24px;box-shadow:var(--shadow);transition:border-color 0.2s,box-shadow 0.2s;}
   .future-card.drag-over{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-light);}
@@ -201,18 +208,18 @@
   .wish-item{background:var(--warm-white);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);cursor:grab;transition:all 0.15s;user-select:none;}
   .wish-item:hover{box-shadow:0 4px 20px rgba(28,26,23,0.12);transform:translateY(-1px);}
   .wish-item.dragging{opacity:0.35;cursor:grabbing;}
-  .wish-item.assigned{opacity:0.45;}
+  .wish-item.assigned{opacity:0.55;}
   .wish-icon{font-size:22px;flex-shrink:0;}
   .wish-text{font-size:14px;font-weight:500;color:var(--ink);}
   .wish-sub{font-size:11px;color:var(--ink-faint);font-style:italic;margin-top:2px;}
   .wish-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;letter-spacing:0.05em;background:var(--gold-light);color:#8a6a1a;margin-top:4px;display:inline-block;}
-  .wish-delete{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:15px;padding:2px 4px;border-radius:4px;margin-left:2px;opacity:0;transition:opacity 0.15s,color 0.15s;flex-shrink:0;}
+  .wish-delete{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:15px;padding:2px 4px;border-radius:4px;opacity:0;transition:opacity 0.15s,color 0.15s;flex-shrink:0;}
   .wish-item:hover .wish-delete{opacity:1;}
   .wish-delete:hover{color:var(--louise);}
-  .wish-colon{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:12px;font-weight:700;line-height:1;padding:3px 6px;border-radius:4px;transition:all 0.15s;letter-spacing:-1px;flex-shrink:0;margin-left:4px;opacity:0;}
+  .wish-colon{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:14px;font-weight:700;line-height:1;padding:3px 6px;border-radius:4px;transition:all 0.15s;flex-shrink:0;opacity:0;}
   .wish-item:hover .wish-colon{opacity:1;}
   .wish-colon:hover{background:var(--ryan-light);color:var(--ryan);}
-  @media(max-width:768px){.wish-delete,.wish-colon{opacity:1;}}
+  @media(max-width:768px){.wish-delete,.wish-colon,.wish-item .item-edit{opacity:1!important;}}
   .add-wish-form{background:var(--warm-white);border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:var(--shadow);}
   .add-wish-title{font-size:12px;font-weight:500;color:var(--ink-faint);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;}
 
@@ -222,32 +229,35 @@
   .sync-pill.show{opacity:1;}
   .sync-pill.error{background:var(--louise);}
 
-  .footer-note{text-align:center;font-size:12px;color:var(--ink-faint);margin-top:40px;font-style:italic;}
-
   @media(max-width:560px){
     .needs-section{grid-template-columns:1fr;}
     .wishlist-grid{grid-template-columns:1fr;}
     .add-row2{flex-wrap:wrap;}
     .month-badge{font-size:10px;padding:0 8px;}
+    .presence-bar{top:8px;right:8px;}
   }
 </style>
 </head>
 <body>
 
-<!-- single floating icon popup, positioned by JS -->
 <div id="iconPopup"><div class="icon-grid" id="iconGrid"></div></div>
 
-<!-- GATE -->
+<!-- GATE — magic link login -->
 <div id="gate">
   <div class="gate-box">
     <div class="gate-icon">🗝️</div>
     <div class="gate-title">Responsibilities, Made Fun</div>
-    <div class="gate-sub">Our plan. Enter the password to get in.</div>
-    <input class="gate-input" type="password" id="gateInput" placeholder="Password" onkeydown="if(event.key==='Enter')checkPassword()">
-    <button class="gate-btn" onclick="checkPassword()">Let me in</button>
-    <div class="gate-error" id="gateError">That's not it. Try again.</div>
+    <div class="gate-sub" id="gateSub">Enter your email to get a sign-in link.</div>
+    <input class="gate-input" type="email" id="gateEmail" placeholder="your@email.com"
+      onkeydown="if(event.key==='Enter')sendMagicLink()">
+    <button class="gate-btn" id="gateMagicBtn" onclick="sendMagicLink()">Send me a link</button>
+    <div class="gate-error" id="gateError" style="display:none"></div>
+    <div class="gate-success" id="gateSuccess" style="display:none"></div>
   </div>
 </div>
+
+<!-- PRESENCE BAR -->
+<div class="presence-bar" id="presenceBar" style="display:none"></div>
 
 <div class="page" id="mainContent" style="display:none">
   <div class="header">
@@ -262,12 +272,12 @@
     <div class="needs-card ryan">
       <div class="needs-card-label">Ryan</div>
       <div class="needs-card-name">What I need</div>
-      <textarea class="needs-field" id="needsRyan" placeholder="e.g. stability, a sense of progress, knowing what's ahead…"></textarea>
+      <textarea class="needs-field" id="needsRyan" placeholder="e.g. stability, a sense of progress…"></textarea>
     </div>
     <div class="needs-card louise">
       <div class="needs-card-label">Louise</div>
       <div class="needs-card-name">What I need</div>
-      <textarea class="needs-field" id="needsLouise" placeholder="e.g. something to look forward to, adventure, feeling free…"></textarea>
+      <textarea class="needs-field" id="needsLouise" placeholder="e.g. something to look forward to, adventure…"></textarea>
     </div>
   </div>
 
@@ -287,8 +297,8 @@
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
       <span class="month-count-info" id="monthCountInfo"></span>
       <div class="month-mgmt-btns">
-        <button class="month-mgmt-btn remove" id="btnRemoveMonth" onclick="removeLastMonth()" title="Remove last month">− Remove month</button>
-        <button class="month-mgmt-btn" id="btnAddMonth" onclick="addNextMonth()" title="Add next month">+ Add month</button>
+        <button class="month-mgmt-btn remove" id="btnRemoveMonth" onclick="removeLastMonth()">− Remove month</button>
+        <button class="month-mgmt-btn" onclick="addNextMonth()">+ Add month</button>
       </div>
     </div>
   </div>
@@ -298,12 +308,12 @@
     <div class="section-title">Someday</div>
     <div class="future-card" id="futureCard"
          ondragover="futureDragOver(event)" ondragleave="futureDragLeave(event)" ondrop="futureDrop(event)">
-      <div class="future-drop-hint">Drop here to plan for after April 2027</div>
+      <div class="future-drop-hint">Drop here for Someday</div>
       <ul class="items-list" id="futureList"></ul>
       <div class="add-form">
         <div class="add-row1">
           <button class="icon-picker-btn" id="fIconBtn"><span id="fIconDisp">✨</span></button>
-          <input class="add-input" id="futureInput" placeholder="Add something for after April 2027…" onkeydown="if(event.key==='Enter')addFuture()">
+          <input class="add-input" id="futureInput" placeholder="Add something for someday…" onkeydown="if(event.key==='Enter')addFuture()">
         </div>
         <div class="add-row2">
           <div class="who-group">
@@ -321,7 +331,7 @@
 
   <div class="wishlist-section">
     <div class="section-title">Things we'd like to do</div>
-    <p class="wishlist-intro">Drag into a month or use the ∶ button to assign. Add your own below.</p>
+    <p class="wishlist-intro">Drag into a month or use ∶ to assign. Add your own below.</p>
     <div class="wishlist-grid" id="wishGrid"></div>
     <div class="add-wish-form">
       <div class="add-wish-title">Add something to the list</div>
@@ -332,14 +342,13 @@
       </div>
     </div>
   </div>
-
-  </div>
+</div>
 
 <!-- CONTEXT MENU -->
 <div id="ctxMenu">
   <div class="ctx-scroll" id="ctxScroll"></div>
   <div class="ctx-divider"></div>
-  <div class="ctx-item ctx-delete" onclick="ctxDelete()"><span class="ctx-icon">🗑</span> Delete item</div>
+  <div class="ctx-item ctx-delete" id="ctxDeleteBtn"><span class="ctx-icon">🗑</span> Delete item</div>
 </div>
 
 <!-- EDIT MODAL -->
@@ -359,17 +368,11 @@
       <label class="cost-toggle"><input type="checkbox" id="editCC" onchange="toggleEditCost()"> Has a cost</label>
       <div class="cost-wrap" id="editCW"><span class="cost-sym">€</span><input class="cost-input" id="editCA" type="number" placeholder="0" min="0"></div>
     </div>
-    <!-- Category picker -->
-    <div style="margin-bottom:12px;">
-      <div style="font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px;">Category</div>
-      <select id="editCatSelect" style="width:100%;background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;cursor:pointer;">
-        <option value="">No category</option>
-      </select>
-    </div>
-    <!-- Assign to month (shown for wishlist and future items) -->
-    <div id="editAssignRow" style="display:none;margin-bottom:12px;">
-      <div style="font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px;">Assign to</div>
-      <select id="editAssignSelect" style="width:100%;background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;cursor:pointer;">
+    <div class="edit-section-label">Category</div>
+    <select class="edit-select" id="editCatSelect"></select>
+    <div id="editAssignRow" style="display:none">
+      <div class="edit-section-label">Assign to</div>
+      <select class="edit-select" id="editAssignSelect">
         <option value="">— keep in current section —</option>
         <option value="someday">Someday</option>
       </select>
@@ -381,1028 +384,826 @@
   </div>
 </div>
 
-
+<div class="sync-bar">
   <div class="sync-pill" id="syncPill">Saved</div>
   <div class="sync-pill error" id="errorPill">Could not save. Check connection.</div>
 </div>
 
 <script>
+/* ============================================================
+   CONFIG
+   NOTE: higginsr@protonmail.com and louisedorgan78@gmail.com
+   are the authorised emails. REMOVE hardcoded couple setup
+   and replace with onboarding UI before going public.
+============================================================ */
 const SUPABASE_URL = 'https://nwcrqweompuliqlfwnwb.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53Y3Jxd2VvbXB1bGlxbGZ3bndiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjI3MTAsImV4cCI6MjA5MDYzODcxMH0.DJ7tThYwfLyVZ6EXpXDRpgwSzSIXWw-rLcedNiqnMNc';
-const PASSWORD = 'InBrugesFiction';
-const POLL_MS = 15000;
+const COUPLE_ID   = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
+const REDIRECT_URL = 'https://higzig.github.io/our-plan/';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ============================================================
-   MONTH GENERATION — dynamic, up to unlimited months
+   MONTH HELPERS
 ============================================================ */
-const START_YEAR  = 2026;
-const START_MONTH = 4; // April = 4
-
+const START_YEAR = 2026, START_MONTH = 4;
 function monthName(n) {
-  // n is 1-based sequential month index
-  const totalMonths = (START_MONTH - 1) + (n - 1); // 0-based offset from Jan START_YEAR
-  const y = START_YEAR + Math.floor(totalMonths / 12);
-  const m = totalMonths % 12; // 0=Jan
-  const names = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  return names[m] + ' ' + y;
+  const t = (START_MONTH-1)+(n-1);
+  const names=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  return names[t%12]+' '+(START_YEAR+Math.floor(t/12));
 }
+function yearOfMonth(n){ return Math.ceil(n/12); }
 
-function yearOfMonth(n) {
-  // Returns 1 or 2 (or more) based on 12-month years
-  return Math.ceil(n / 12);
-}
-
-const ICONS = ["✨","🎯","🏠","✈️","💰","💍","🎉","🎂","🌍","🌊","🏖️","🏔️","🎓","💼","🛠️","📖","🎮","🎵","🍕","☕","🚗","🐶","❤️","🌱","💡","🏦","🗺️","📅","🎁","🤝","🏃","💪","🌟","🎪","🏋️","🎨"];
-
-// monthCount is now dynamic — stored in data, default 12
-let monthCount = 12;
-let activeYear = 1;
-
-const DEFAULT_WISHLIST = [
-  {id:"w1",icon:"✈️",text:"South-East Asia trip",sub:"Drag to a month or to after April 2027",assigned:false,assignedTo:null},
-  {id:"w2",icon:"🏠",text:"Buy a house",sub:"Drag to a month or to after April 2027",assigned:false,assignedTo:null},
-  {id:"w3",icon:"💍",text:"Get engaged or married",sub:"Drag to a month or to after April 2027",assigned:false,assignedTo:null},
-  {id:"w4",icon:"🛠️",text:"Build GetDocket",sub:"My project, ongoing",assigned:false,assignedTo:null},
-  {id:"w5",icon:"📖",text:"Write a novel",sub:"My project, ongoing",assigned:false,assignedTo:null},
+const ICONS=["✨","🎯","🏠","✈️","💰","💍","🎉","🎂","🌍","🌊","🏖️","🏔️","🎓","💼","🛠️","📖","🎮","🎵","🍕","☕","🚗","🐶","❤️","🌱","💡","🏦","🗺️","📅","🎁","🤝","🏃","💪","🌟","🎪","🏋️","🎨"];
+const CATEGORIES=[
+  {name:'Holiday',icon:'✈️',bg:'#E8F0FB',fg:'#2a5a9c'},
+  {name:'Weekend away',icon:'🚗',bg:'#EDF6EE',fg:'#2d6e35'},
+  {name:'Home',icon:'🏠',bg:'#FDF0E8',fg:'#9c4a1a'},
+  {name:'Finance',icon:'💰',bg:'#FDF7E4',fg:'#7a5c0a'},
+  {name:'Saving goal',icon:'🏦',bg:'#E8F5F0',fg:'#1a6e54'},
+  {name:'Health',icon:'💪',bg:'#FCE8F0',fg:'#8c1a4a'},
+  {name:'Fitness',icon:'🏃',bg:'#EDE8FC',fg:'#4a2a9c'},
+  {name:'Social',icon:'🎉',bg:'#FFF0E0',fg:'#8c4e00'},
+  {name:'Date night',icon:'❤️',bg:'#FCE8E8',fg:'#8c1a1a'},
+  {name:'Family',icon:'🤝',bg:'#F0F8FF',fg:'#1a4a7a'},
+  {name:'Career',icon:'💼',bg:'#F0F0F8',fg:'#2a2a7a'},
+  {name:'Learning',icon:'📖',bg:'#FFF8E8',fg:'#7a5000'},
+  {name:'Project',icon:'🛠️',bg:'#F4F0EC',fg:'#5c3a00'},
+  {name:'Creative',icon:'🎨',bg:'#FFF0F8',fg:'#7a0060'},
+  {name:'Music',icon:'🎵',bg:'#F8F0FF',fg:'#5a0080'},
+  {name:'Gaming',icon:'🎮',bg:'#E8F0FF',fg:'#1a3a8c'},
+  {name:'Food & Drink',icon:'🍕',bg:'#FFF0E8',fg:'#8c3000'},
+  {name:'Nature',icon:'🌱',bg:'#EDF8ED',fg:'#1a6a1a'},
+  {name:'Adventure',icon:'🏔️',bg:'#E8F4F8',fg:'#0a4a5a'},
+  {name:'Beach',icon:'🏖️',bg:'#FFF8E0',fg:'#7a5500'},
+  {name:'Big milestone',icon:'🎯',bg:'#F8F0E8',fg:'#7a3a00'},
+  {name:'Celebration',icon:'🎂',bg:'#FFF0F4',fg:'#8c005a'},
+  {name:'Gift',icon:'🎁',bg:'#F4F0FF',fg:'#5a1a8c'},
+  {name:'Wedding',icon:'💍',bg:'#FFF8F8',fg:'#8c1a1a'},
+  {name:'Moving',icon:'🗺️',bg:'#F0F8FC',fg:'#0a4a6a'},
+  {name:'Pet',icon:'🐶',bg:'#FFF4E8',fg:'#7a3a00'},
+  {name:'Idea',icon:'💡',bg:'#FFFFF0',fg:'#6a6a00'},
+  {name:'Event',icon:'📅',bg:'#F0F4FF',fg:'#1a2a8c'},
+  {name:'Wishlist',icon:'🌟',bg:'#FFFFF4',fg:'#7a6a00'},
 ];
-const DEFAULT_FUTURE = [
-  {text:"Mortgage application underway",who:"shared",icon:"🏠",cost:null},
-  {text:"We know where we're living and when",who:"shared",icon:"🗺️",cost:null},
-];
 
-const DEFAULT_MONTHS_DATA = Array.from({length:12},(_,i)=>({n:i+1,items:
-  i===7?[{text:"I hit €10,000 in savings",who:"ryan",icon:"💰",cost:null}]:
-  i===8?[{text:"We meet with a mortgage adviser",who:"shared",icon:"🏦",cost:null}]:[]
-}));
+let monthCount=12, activeYear=1;
+let currentUser=null, currentMember=null;
 
-const ui = {
-  monthWho:{}, monthIcon:{}, monthIconDisp:{},
-  futureWho:'shared', futureIcon:'✨',
+const ui={
+  monthWho:{},monthIcon:{},
+  futureWho:'shared',futureIcon:'✨',
   wishIcon:'🌟',
-  dragId:null,
-  reorderDragEl:null,
-  pickerTarget:null  // current icon picker callback
+  dragId:null,reorderDragEl:null,pickerTarget:null,
+  monthItems:{}
 };
-// monthWho and monthIcon are populated lazily in buildMonthCard
 
 /* ============================================================
-   ICON PICKER — single body-level popup
+   MAGIC LINK AUTH
 ============================================================ */
-const popup  = document.getElementById('iconPopup');
-const iconGrid = document.getElementById('iconGrid');
+async function sendMagicLink() {
+  const email = document.getElementById('gateEmail').value.trim().toLowerCase();
+  if (!email) return;
+  const btn = document.getElementById('gateMagicBtn');
+  const errEl = document.getElementById('gateError');
+  const okEl  = document.getElementById('gateSuccess');
+  errEl.style.display='none'; okEl.style.display='none';
+  btn.disabled=true; btn.textContent='Sending…';
 
-function buildIconGrid(currentIcon) {
-  iconGrid.innerHTML = '';
-  ICONS.forEach(ic => {
-    const b = document.createElement('button');
-    b.className = 'icon-opt' + (ic===currentIcon?' sel':'');
-    b.textContent = ic;
-    b.addEventListener('click', e => {
-      e.stopPropagation();
-      if (ui.pickerTarget) ui.pickerTarget(ic);
-      closeIconPopup();
-    });
-    iconGrid.appendChild(b);
+  // Check email is on the approved list
+  const {data:members} = await sb.from('couple_members').select('email').eq('couple_id',COUPLE_ID);
+  const allowed = members?.map(m=>m.email.toLowerCase())||[];
+  if (!allowed.includes(email)) {
+    errEl.textContent="That email isn't on the list. Ask Ryan to add you.";
+    errEl.style.display='block';
+    btn.disabled=false; btn.textContent='Send me a link';
+    return;
+  }
+
+  const {error} = await sb.auth.signInWithOtp({
+    email,
+    options:{ emailRedirectTo: REDIRECT_URL }
   });
-}
-
-function openIconPopup(anchorEl, currentIcon, onPick) {
-  ui.pickerTarget = onPick;
-  buildIconGrid(currentIcon);
-  const rect = anchorEl.getBoundingClientRect();
-  popup.style.top  = (rect.bottom + window.scrollY + 6) + 'px';
-  popup.style.left = Math.min(rect.left + window.scrollX, window.innerWidth - 250) + 'px';
-  popup.classList.add('open');
-}
-
-function closeIconPopup() {
-  popup.classList.remove('open');
-  ui.pickerTarget = null;
-}
-
-document.addEventListener('click', e => {
-  if (!popup.contains(e.target)) closeIconPopup();
-});
-
-/* static icon buttons wired after DOM ready */
-function wireStaticIconBtns() {
-  document.getElementById('fIconBtn').addEventListener('click', e => {
-    e.stopPropagation();
-    openIconPopup(e.currentTarget, ui.futureIcon, ic => {
-      ui.futureIcon = ic;
-      document.getElementById('fIconDisp').textContent = ic;
-    });
-  });
-  document.getElementById('wishIconBtn').addEventListener('click', e => {
-    e.stopPropagation();
-    openIconPopup(e.currentTarget, ui.wishIcon, ic => {
-      ui.wishIcon = ic;
-      document.getElementById('wishIconDisp').textContent = ic;
-    });
-  });
-  document.getElementById('editIconBtn').addEventListener('click', e => {
-    e.stopPropagation();
-    openIconPopup(e.currentTarget, editModal.icon, ic => {
-      editModal.icon = ic;
-      document.getElementById('editIconDisp').textContent = ic;
-    });
-  });
-}
-
-/* ============================================================
-   PASSWORD
-============================================================ */
-function checkPassword() {
-  if (document.getElementById('gateInput').value === PASSWORD) {
-    document.getElementById('gate').classList.add('hidden');
-    document.getElementById('mainContent').style.display = 'block';
-    sessionStorage.setItem('rmf_auth','1');
-    initApp();
+  if (error) {
+    errEl.textContent='Something went wrong. Try again.';
+    errEl.style.display='block';
+    btn.disabled=false; btn.textContent='Send me a link';
   } else {
-    document.getElementById('gateError').style.display = 'block';
-    document.getElementById('gateInput').value = '';
+    okEl.textContent='Link sent! Check your email and click it to sign in.';
+    okEl.style.display='block';
+    btn.textContent='Link sent ✓';
+    document.getElementById('gateSub').textContent='Check your inbox.';
   }
 }
 
-/* ============================================================
-   SUPABASE
-============================================================ */
-const HEADERS = {
-  'apikey': SUPABASE_KEY,
-  'Authorization': 'Bearer ' + SUPABASE_KEY,
-  'Content-Type': 'application/json',
-  'Prefer': 'resolution=merge-duplicates'
-};
-
-async function dbGet(key) {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/plan_data?key=eq.${encodeURIComponent(key)}&select=value`, { headers: HEADERS });
-    if (!res.ok) { console.error('dbGet HTTP', res.status, await res.text()); return null; }
-    const rows = await res.json();
-    if (rows && rows.length) { try { return JSON.parse(rows[0].value); } catch(e) { return null; } }
-    return null;
-  } catch(e) { console.error('dbGet error', e); return null; }
+async function signOut() {
+  await sb.auth.signOut();
+  updatePresence(false);
+  location.reload();
 }
 
-async function dbSet(key, value) {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/plan_data`, {
-      method: 'POST',
-      headers: HEADERS,
-      body: JSON.stringify({ key, value: JSON.stringify(value) })
-    });
-    if (!res.ok) {
-      const txt = await res.text();
-      console.error('dbSet HTTP', res.status, txt);
-      return false;
+/* ============================================================
+   SUPABASE DATA LAYER
+============================================================ */
+async function loadAll() {
+  const [itemsRes, settingsRes] = await Promise.all([
+    sb.from('items').select('*').eq('couple_id',COUPLE_ID).order('sort_order'),
+    sb.from('couple_settings').select('*').eq('couple_id',COUPLE_ID).single()
+  ]);
+
+  const items    = itemsRes.data || [];
+  const settings = settingsRes.data || {};
+
+  monthCount = settings.month_count || 12;
+
+  // Needs
+  if (settings.needs_ryan)   document.getElementById('needsRyan').value   = settings.needs_ryan;
+  if (settings.needs_louise) document.getElementById('needsLouise').value = settings.needs_louise;
+
+  // Sort items by location
+  ui.monthItems = {};
+  for(let n=1;n<=monthCount;n++) ui.monthItems[n]=[];
+  const futureItems=[], wishItems=[];
+
+  items.forEach(item => {
+    if (item.location.startsWith('month:')) {
+      const n = parseInt(item.location.split(':')[1]);
+      if (!ui.monthItems[n]) ui.monthItems[n]=[];
+      ui.monthItems[n].push(item);
+    } else if (item.location==='someday') {
+      futureItems.push(item);
+    } else if (item.location==='wishlist') {
+      wishItems.push(item);
     }
-    return true;
-  } catch(e) { console.error('dbSet error', e); return false; }
+  });
+
+  updateYearTabs();
+  buildMonthsView();
+  buildFutureList(futureItems);
+  buildWishlist(wishItems);
+}
+
+async function saveItem(item) {
+  // item must have: location, text, icon, who, cost, category, sort_order, couple_id
+  // and optionally: id (for update), assigned_to (for wishlist)
+  if (item.id) {
+    await sb.from('items').update({
+      location:item.location, text:item.text, icon:item.icon,
+      who:item.who, cost:item.cost||null, category:item.category||null,
+      sort_order:item.sort_order||0, assigned_to:item.assigned_to||null,
+      updated_at: new Date().toISOString()
+    }).eq('id',item.id);
+  } else {
+    const {data} = await sb.from('items').insert({
+      couple_id:COUPLE_ID, location:item.location, text:item.text,
+      icon:item.icon||'✨', who:item.who||'shared', cost:item.cost||null,
+      category:item.category||null, sort_order:item.sort_order||0,
+      assigned_to:item.assigned_to||null
+    }).select().single();
+    if (data) item.id = data.id;
+  }
+}
+
+async function deleteItem(id) {
+  await sb.from('items').delete().eq('id',id);
+}
+
+async function saveSettings(patch) {
+  await sb.from('couple_settings').upsert({
+    couple_id:COUPLE_ID, ...patch, updated_at:new Date().toISOString()
+  });
 }
 
 /* ============================================================
-   SAVE / SYNC
+   SAVE QUEUE — debounced, serialises the visible DOM
 ============================================================ */
-let saveTimer = null;
-let lastHash  = '';
-
-function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(saveAll, 800); }
+let saveTimer=null;
+function scheduleSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveAll,900); }
 
 async function saveAll() {
-  // Snapshot all visible month lists into cache first
-  document.querySelectorAll('[data-month]').forEach(card => {
-    const n = parseInt(card.dataset.month);
-    if (!ui.monthItems) ui.monthItems = {};
-    ui.monthItems[n] = serializeList('list-'+n);
+  // Snapshot all visible month items
+  document.querySelectorAll('[data-month]').forEach(card=>{
+    const n=parseInt(card.dataset.month);
+    ui.monthItems[n]=serializeList('list-'+n);
   });
-  const data = {
-    needsRyan:   document.getElementById('needsRyan').value,
-    needsLouise: document.getElementById('needsLouise').value,
-    monthCount:  monthCount,
-    months:      {},
-    future:      serializeList('futureList'),
-    wishlist:    serializeWishlist()
-  };
-  for (let n = 1; n <= monthCount; n++) {
-    data.months[n] = ui.monthItems?.[n] || [];
+
+  // Rebuild full item list and upsert
+  const allItems=[];
+  for(let n=1;n<=monthCount;n++){
+    (ui.monthItems[n]||[]).forEach((item,i)=>{
+      allItems.push({...item, location:'month:'+n, sort_order:i, couple_id:COUPLE_ID});
+    });
   }
-  const ok = await dbSet('plan', data);
-  if (ok) { lastHash = JSON.stringify(data); showPill('syncPill'); }
-  else     { showPill('errorPill'); }
+  serializeList('futureList').forEach((item,i)=>{
+    allItems.push({...item, location:'someday', sort_order:i, couple_id:COUPLE_ID});
+  });
+  serializeWishlist().forEach((item,i)=>{
+    allItems.push({...item, location:'wishlist', sort_order:i, couple_id:COUPLE_ID});
+  });
+
+  // Delete all and re-insert (simplest for now; can optimise later with diffing)
+  const {error:delErr} = await sb.from('items').delete().eq('couple_id',COUPLE_ID);
+  if (delErr) { showPill('errorPill'); return; }
+  if (allItems.length) {
+    const {error:insErr} = await sb.from('items').insert(allItems);
+    if (insErr) { showPill('errorPill'); return; }
+  }
+
+  await saveSettings({
+    needs_ryan:   document.getElementById('needsRyan').value,
+    needs_louise: document.getElementById('needsLouise').value,
+    month_count:  monthCount
+  });
+
+  showPill('syncPill');
 }
 
-function showPill(id) {
-  const el = document.getElementById(id);
+function showPill(id){
+  const el=document.getElementById(id);
   el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'), 2200);
+  setTimeout(()=>el.classList.remove('show'),2200);
 }
 
-function serializeList(listId) {
-  const items = [];
-  document.querySelectorAll('#'+listId+' .item-row').forEach(row => {
-    const who  = row.dataset.who  || (() => {
-      const dot = row.querySelector('.item-dot');
-      return dot ? (dot.classList.contains('ryan')?'ryan':dot.classList.contains('louise')?'louise':'shared') : 'shared';
-    })();
-    const icon = row.dataset.icon || row.querySelector('.item-icon')?.textContent.trim() || '✨';
-    const text = row.querySelector('.item-text')?.textContent.trim()  || '';
-    const cost = row.dataset.cost || null;
-    const cat  = row.dataset.cat || '';
-    if (text) items.push({icon,who,text,cost:cost||null,cat});
+function serializeList(listId){
+  const items=[];
+  document.querySelectorAll('#'+listId+' .item-row').forEach(row=>{
+    const who = row.dataset.who || 'shared';
+    const icon= row.dataset.icon||'✨';
+    const text= row.querySelector('.item-text')?.textContent.trim()||'';
+    const cost= row.dataset.cost||null;
+    const cat = row.dataset.cat||'';
+    const id  = row.dataset.dbid||null;
+    if(text) items.push({id,icon,who,text,cost:cost||null,category:cat});
   });
   return items;
 }
 
-function serializeWishlist() {
-  const items = [];
-  document.querySelectorAll('#wishGrid .wish-item').forEach(el => {
-    const icon       = el.querySelector('.wish-icon')?.textContent.trim() || '🌟';
-    const rawText    = el.querySelector('.wish-text')?.textContent.trim() || '';
-    // Strip any category pill text from wish-text
-    const catPill    = el.querySelector('.wish-text .item-cat');
-    const text       = catPill ? rawText.replace(catPill.textContent,'').trim() : rawText;
-    const badgeEl    = el.querySelector('.wish-badge');
+function serializeWishlist(){
+  const items=[];
+  document.querySelectorAll('#wishGrid .wish-item').forEach(el=>{
+    const wtEl   = el.querySelector('.wish-text');
+    const catPil = wtEl?.querySelector('.item-cat');
+    const text   = catPil ? (wtEl.textContent||'').replace(catPil.textContent,'').trim() : (wtEl?.textContent.trim()||'');
+    const icon   = el.querySelector('.wish-icon')?.textContent.trim()||'🌟';
+    const badge  = el.querySelector('.wish-badge');
+    const sub    = el.querySelector('.wish-sub');
     const assigned   = el.classList.contains('assigned');
-    const assignedTo = badgeEl ? badgeEl.textContent.replace('Added to ','') : null;
-    const subEl      = el.querySelector('.wish-sub');
-    const sub        = (!assigned && subEl) ? subEl.textContent : 'Drag to a month or use ∶';
-    const id         = el.dataset.wish;
-    const cat        = el.dataset.cat || '';
-    if (text) items.push({id,icon,text,sub,assigned,assignedTo,cat});
+    const assignedTo = badge ? badge.textContent.replace('Added to ','') : null;
+    const subText    = (!assigned && sub) ? sub.textContent : 'Drag to a month or use ∶';
+    const id  = el.dataset.dbid||null;
+    const cat = el.dataset.cat||'';
+    if(text) items.push({id,icon,text,sub:subText,assigned,assigned_to:assignedTo,category:cat});
   });
   return items;
 }
 
-async function pollForChanges() {
-  try {
-    const data = await dbGet('plan');
-    const hash = JSON.stringify(data);
-    if (data && hash !== lastHash) {
-      lastHash = hash;
-      applyData(data);
-      showPill('syncPill');
-    }
-  } catch(e) {}
+/* ============================================================
+   REALTIME — live sync + presence
+============================================================ */
+function setupRealtime(){
+  // Items channel
+  sb.channel('items-changes')
+    .on('postgres_changes',{event:'*',schema:'public',table:'items',filter:`couple_id=eq.${COUPLE_ID}`},
+      () => { loadAll(); })
+    .subscribe();
+
+  // Settings channel
+  sb.channel('settings-changes')
+    .on('postgres_changes',{event:'*',schema:'public',table:'couple_settings',filter:`couple_id=eq.${COUPLE_ID}`},
+      payload => {
+        const d=payload.new;
+        if(d.needs_ryan   && document.getElementById('needsRyan').value!==d.needs_ryan)   document.getElementById('needsRyan').value=d.needs_ryan;
+        if(d.needs_louise && document.getElementById('needsLouise').value!==d.needs_louise) document.getElementById('needsLouise').value=d.needs_louise;
+      })
+    .subscribe();
+
+  // Presence channel
+  sb.channel('presence-changes')
+    .on('postgres_changes',{event:'*',schema:'public',table:'presence',filter:`couple_id=eq.${COUPLE_ID}`},
+      () => refreshPresenceBar())
+    .subscribe();
 }
 
-async function confirmReset() {
-  if (confirm('Clear everything and start fresh?')) {
-    await dbSet('plan', null);
-    location.reload();
+async function updatePresence(online){
+  if(!currentUser) return;
+  if(online){
+    await sb.from('presence').upsert({
+      couple_id:COUPLE_ID,
+      user_email:currentUser.email,
+      display_name:currentMember?.display_name||currentUser.email,
+      last_seen:new Date().toISOString()
+    },{onConflict:'user_email,couple_id'});
+  } else {
+    await sb.from('presence').delete().eq('user_email',currentUser.email).eq('couple_id',COUPLE_ID);
   }
+}
+
+async function refreshPresenceBar(){
+  const {data}=await sb.from('presence').select('*').eq('couple_id',COUPLE_ID);
+  const bar=document.getElementById('presenceBar');
+  if(!data||data.length===0){bar.style.display='none';return;}
+  // Filter to last 60 seconds
+  const now=Date.now();
+  const active=(data||[]).filter(p=>now-new Date(p.last_seen).getTime()<60000);
+  if(active.length===0){bar.style.display='none';return;}
+  bar.style.display='flex';
+  bar.innerHTML='';
+  active.forEach(p=>{
+    if(p.user_email===currentUser?.email) return; // don't show yourself
+    const color=p.display_name==='Ryan'?'ryan':'louise';
+    const pill=document.createElement('div');
+    pill.className='presence-pill';
+    pill.innerHTML=`<span class="presence-dot ${color}"></span>${p.display_name} is here`;
+    bar.appendChild(pill);
+  });
+  // Add sign-out pill
+  const out=document.createElement('div');
+  out.className='user-pill';
+  out.textContent=(currentMember?.display_name||'Me')+' · Sign out';
+  out.onclick=signOut;
+  bar.appendChild(out);
+}
+
+// Heartbeat every 30s
+setInterval(()=>updatePresence(true),30000);
+
+/* ============================================================
+   ICON PICKER
+============================================================ */
+const popup=document.getElementById('iconPopup');
+const iconGridEl=document.getElementById('iconGrid');
+
+function buildIconGrid(current){
+  iconGridEl.innerHTML='';
+  ICONS.forEach(ic=>{
+    const b=document.createElement('button');
+    b.className='icon-opt'+(ic===current?' sel':'');
+    b.textContent=ic;
+    b.addEventListener('click',e=>{e.stopPropagation();if(ui.pickerTarget)ui.pickerTarget(ic);closeIconPopup();});
+    iconGridEl.appendChild(b);
+  });
+}
+function openIconPopup(anchor,current,onPick){
+  ui.pickerTarget=onPick;
+  buildIconGrid(current);
+  const r=anchor.getBoundingClientRect();
+  popup.style.top=(r.bottom+window.scrollY+6)+'px';
+  popup.style.left=Math.min(r.left+window.scrollX,window.innerWidth-250)+'px';
+  popup.classList.add('open');
+}
+function closeIconPopup(){popup.classList.remove('open');ui.pickerTarget=null;}
+document.addEventListener('mousedown',e=>{if(!popup.contains(e.target))closeIconPopup();});
+
+function wireStaticIconBtns(){
+  document.getElementById('fIconBtn').addEventListener('click',e=>{e.stopPropagation();openIconPopup(e.currentTarget,ui.futureIcon,ic=>{ui.futureIcon=ic;document.getElementById('fIconDisp').textContent=ic;});});
+  document.getElementById('wishIconBtn').addEventListener('click',e=>{e.stopPropagation();openIconPopup(e.currentTarget,ui.wishIcon,ic=>{ui.wishIcon=ic;document.getElementById('wishIconDisp').textContent=ic;});});
+  document.getElementById('editIconBtn').addEventListener('click',e=>{e.stopPropagation();openIconPopup(e.currentTarget,editModal.icon,ic=>{editModal.icon=ic;document.getElementById('editIconDisp').textContent=ic;});});
 }
 
 /* ============================================================
    COST TOGGLE
 ============================================================ */
-function toggleCost(key) {
-  const isF  = key==='future';
-  const chk  = document.getElementById(isF?'fCC':'cc-'+key);
-  const wrap = document.getElementById(isF?'fCW':'cw-'+key);
-  wrap.classList.toggle('show', chk.checked);
+function toggleCost(key){
+  const isF=key==='future';
+  const chk=document.getElementById(isF?'fCC':'cc-'+key);
+  const wrap=document.getElementById(isF?'fCW':'cw-'+key);
+  wrap.classList.toggle('show',chk.checked);
 }
 
 /* ============================================================
-   ITEMS
+   CATEGORY HELPERS
 ============================================================ */
-function removeItem(btn) { btn.closest('.item-row').remove(); scheduleSave(); }
-
-function catPillHTML(cat) {
-  if (!cat) return '';
-  const c = CATEGORIES.find(x => x.name === cat);
-  if (!c) return '';
-  return `<span class="item-cat" style="background:${c.bg};color:${c.fg}">${c.icon} ${c.name}</span>`;
+function catPillHTML(cat){
+  if(!cat)return'';
+  const c=CATEGORIES.find(x=>x.name===cat);
+  if(!c)return'';
+  return`<span class="item-cat" style="background:${c.bg};color:${c.fg}">${c.icon} ${c.name}</span>`;
+}
+function populateCatSelect(selId,current){
+  const sel=document.getElementById(selId);
+  sel.innerHTML='<option value="">No category</option>';
+  CATEGORIES.forEach(c=>{
+    const o=document.createElement('option');
+    o.value=c.name;o.textContent=c.icon+' '+c.name;
+    if(c.name===current)o.selected=true;
+    sel.appendChild(o);
+  });
+}
+function populateAssignSelect(){
+  const sel=document.getElementById('editAssignSelect');
+  sel.innerHTML='<option value="">— keep in current section —</option><option value="someday">Someday</option>';
+  for(let n=1;n<=monthCount;n++){
+    const o=document.createElement('option');
+    o.value=String(n);o.textContent=monthName(n);
+    sel.appendChild(o);
+  }
 }
 
-function makeLi(icon, who, text, cost, cat) {
-  const li = document.createElement('li');
-  li.className = 'item-row';
-  li.draggable = true;
-  li.dataset.icon = icon;
-  li.dataset.who  = who;
-  li.dataset.cost = cost || '';
-  li.dataset.cat  = cat  || '';
-  const costHTML = (cost && parseFloat(cost)>0)
-    ? `<span class="item-cost-tag">€${parseFloat(cost).toLocaleString('en-IE',{minimumFractionDigits:0,maximumFractionDigits:2})}</span>` : '';
-  li.innerHTML = `
+/* ============================================================
+   ITEMS — makeLi
+============================================================ */
+function removeItem(btn){
+  const li=btn.closest('.item-row');
+  const id=li?.dataset.dbid;
+  if(id) deleteItem(id);
+  li?.remove();
+  scheduleSave();
+}
+
+function makeLi(icon,who,text,cost,cat,dbid){
+  const li=document.createElement('li');
+  li.className='item-row';
+  li.draggable=true;
+  li.dataset.icon=icon;li.dataset.who=who;li.dataset.cost=cost||'';li.dataset.cat=cat||'';
+  if(dbid)li.dataset.dbid=dbid;
+  const costHTML=(cost&&parseFloat(cost)>0)?`<span class="item-cost-tag">€${parseFloat(cost).toLocaleString('en-IE',{minimumFractionDigits:0,maximumFractionDigits:2})}</span>`:'';
+  li.innerHTML=`
     <span class="item-drag-handle" title="Drag to reorder">⠿</span>
     <span class="item-icon">${icon}</span>
     <span class="item-dot ${who}"></span>
     <div class="item-main"><span class="item-text">${text}</span>${catPillHTML(cat)}${costHTML}</div>
     <div class="item-actions">
       <button class="item-colon" title="Options">∶</button>
-      <button class="item-edit" onclick="openEditModal(this)" title="Edit">✎</button>
+      <button class="item-edit" onclick="openEditModal(this,'item')" title="Edit">✎</button>
       <button class="item-delete" onclick="removeItem(this)" title="Delete">×</button>
     </div>`;
-  // Colon button opens context menu
-  li.querySelector('.item-colon').addEventListener('click', e => { e.stopPropagation(); openCtxMenu(e, li, 'item'); });
-  // Desktop drag-to-reorder (only from handle)
-  li.addEventListener('dragstart', e => {
-    // If this is a reorder drag from the handle
-    if (e.target.classList.contains('item-drag-handle')) {
-      ui.reorderDragEl = li;
-      ui.dragId = null; // clear wish drag
-      li.classList.add('dragging-item');
-      e.dataTransfer.effectAllowed = 'move';
-      e.stopPropagation();
-    } else {
-      // Prevent other drags on item rows
-      e.preventDefault();
-    }
+  li.querySelector('.item-colon').addEventListener('mousedown',e=>{e.stopPropagation();e.preventDefault();openCtxMenu(e,li,'item');});
+  // Desktop reorder drag
+  li.addEventListener('dragstart',e=>{
+    if(e.target.classList.contains('item-drag-handle')){
+      ui.reorderDragEl=li;ui.dragId=null;
+      li.classList.add('dragging-item');e.dataTransfer.effectAllowed='move';e.stopPropagation();
+    }else{e.preventDefault();}
   });
-  li.addEventListener('dragend', () => {
-    li.classList.remove('dragging-item');
-    document.querySelectorAll('.drag-target-above,.drag-target-below').forEach(el=>el.classList.remove('drag-target-above','drag-target-below'));
-    ui.reorderDragEl = null;
-  });
-  li.addEventListener('dragover', e => {
-    if (!ui.reorderDragEl || ui.reorderDragEl === li) return;
-    e.preventDefault(); e.stopPropagation();
-    const rect = li.getBoundingClientRect();
-    const mid  = rect.top + rect.height/2;
-    li.classList.remove('drag-target-above','drag-target-below');
-    li.classList.add(e.clientY < mid ? 'drag-target-above' : 'drag-target-below');
-  });
-  li.addEventListener('dragleave', () => {
-    li.classList.remove('drag-target-above','drag-target-below');
-  });
-  li.addEventListener('drop', e => {
-    if (!ui.reorderDragEl || ui.reorderDragEl === li) return;
-    e.preventDefault(); e.stopPropagation();
-    const rect = li.getBoundingClientRect();
-    const mid  = rect.top + rect.height/2;
-    const parent = li.parentNode;
-    if (e.clientY < mid) parent.insertBefore(ui.reorderDragEl, li);
-    else                 parent.insertBefore(ui.reorderDragEl, li.nextSibling);
-    li.classList.remove('drag-target-above','drag-target-below');
-    scheduleSave();
-  });
-  // Touch drag-to-reorder
+  li.addEventListener('dragend',()=>{li.classList.remove('dragging-item');document.querySelectorAll('.drag-target-above,.drag-target-below').forEach(el=>el.classList.remove('drag-target-above','drag-target-below'));ui.reorderDragEl=null;});
+  li.addEventListener('dragover',e=>{if(!ui.reorderDragEl||ui.reorderDragEl===li)return;e.preventDefault();e.stopPropagation();const r=li.getBoundingClientRect(),mid=r.top+r.height/2;li.classList.remove('drag-target-above','drag-target-below');li.classList.add(e.clientY<mid?'drag-target-above':'drag-target-below');});
+  li.addEventListener('dragleave',()=>li.classList.remove('drag-target-above','drag-target-below'));
+  li.addEventListener('drop',e=>{if(!ui.reorderDragEl||ui.reorderDragEl===li)return;e.preventDefault();e.stopPropagation();const r=li.getBoundingClientRect(),mid=r.top+r.height/2,p=li.parentNode;if(e.clientY<mid)p.insertBefore(ui.reorderDragEl,li);else p.insertBefore(ui.reorderDragEl,li.nextSibling);li.classList.remove('drag-target-above','drag-target-below');scheduleSave();});
+  // Touch drag
   setupTouchDrag(li);
-  // Right-click context menu
-  li.addEventListener('contextmenu', e => openCtxMenu(e, li, 'item'));
-  // Long press for mobile
-  let longPressTimer;
-  li.addEventListener('touchstart', e => {
-    if (e.target.closest('.item-drag-handle,.item-actions')) return;
-    longPressTimer = setTimeout(() => { openCtxMenu(e, li, 'item'); }, 600);
-  }, {passive:true});
-  li.addEventListener('touchend',    () => clearTimeout(longPressTimer));
-  li.addEventListener('touchmove',   () => clearTimeout(longPressTimer));
-  li.addEventListener('touchcancel', () => clearTimeout(longPressTimer));
+  // Context menu
+  li.addEventListener('contextmenu',e=>openCtxMenu(e,li,'item'));
+  let lpt;
+  li.addEventListener('touchstart',e=>{if(e.target.closest('.item-drag-handle,.item-actions'))return;lpt=setTimeout(()=>openCtxMenu(e,li,'item'),600);},{passive:true});
+  li.addEventListener('touchend',()=>clearTimeout(lpt));
+  li.addEventListener('touchmove',()=>clearTimeout(lpt));
   return li;
 }
 
 /* ============================================================
    TOUCH DRAG-TO-REORDER
 ============================================================ */
-function setupTouchDrag(li) {
-  let startY, clone, placeholder, listEl, items, startIndex;
-  const handle = li.querySelector('.item-drag-handle');
-  handle.addEventListener('touchstart', e => {
-    e.stopPropagation();
-    startY = e.touches[0].clientY;
-    listEl = li.closest('.items-list');
-    if (!listEl) return;
-    const rect = li.getBoundingClientRect();
-    // Create ghost clone
-    clone = li.cloneNode(true);
-    clone.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;opacity:0.85;z-index:3000;pointer-events:none;box-shadow:0 8px 24px rgba(28,26,23,0.18);border-radius:8px;background:var(--warm-white);`;
+function setupTouchDrag(li){
+  let startY,clone,placeholder,listEl;
+  const handle=li.querySelector('.item-drag-handle');
+  handle.addEventListener('touchstart',e=>{
+    e.stopPropagation();startY=e.touches[0].clientY;listEl=li.closest('.items-list');if(!listEl)return;
+    const r=li.getBoundingClientRect();
+    clone=li.cloneNode(true);
+    clone.style.cssText=`position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;opacity:0.85;z-index:3000;pointer-events:none;box-shadow:0 8px 24px rgba(28,26,23,0.18);border-radius:8px;background:var(--warm-white);`;
     document.body.appendChild(clone);
-    // Placeholder
-    placeholder = document.createElement('li');
-    placeholder.className = 'item-row';
-    placeholder.style.cssText = 'border:2px dashed var(--gold);border-radius:8px;background:var(--gold-light);opacity:0.5;min-height:40px;';
-    li.parentNode.insertBefore(placeholder, li);
-    li.style.display = 'none';
-  }, {passive:true});
-
-  handle.addEventListener('touchmove', e => {
-    if (!clone) return;
-    e.preventDefault();
-    const ty = e.touches[0].clientY;
-    const dy = ty - startY;
-    const rect = li.getBoundingClientRect();
-    clone.style.top = (parseFloat(clone.style.top) + dy) + 'px';
-    startY = ty;
-    // Find closest sibling
-    const siblings = Array.from(listEl.querySelectorAll('.item-row:not([style*="display: none"])'));
-    let target = null, insertBefore = true;
-    for (const sib of siblings) {
-      if (sib === placeholder) continue;
-      const r = sib.getBoundingClientRect();
-      const mid = r.top + r.height/2;
-      if (ty < mid) { target = sib; insertBefore = true; break; }
-      else          { target = sib; insertBefore = false; }
-    }
-    if (target) {
-      if (insertBefore) listEl.insertBefore(placeholder, target);
-      else listEl.insertBefore(placeholder, target.nextSibling);
-    } else {
-      listEl.appendChild(placeholder);
-    }
-  }, {passive:false});
-
-  const endTouch = () => {
-    if (!clone) return;
-    document.body.removeChild(clone); clone = null;
-    li.style.display = '';
-    placeholder.parentNode.insertBefore(li, placeholder);
-    placeholder.remove(); placeholder = null;
-    scheduleSave();
-  };
-  handle.addEventListener('touchend', endTouch);
-  handle.addEventListener('touchcancel', endTouch);
+    placeholder=document.createElement('li');placeholder.className='item-row';
+    placeholder.style.cssText='border:2px dashed var(--gold);border-radius:8px;background:var(--gold-light);opacity:0.5;min-height:40px;';
+    li.parentNode.insertBefore(placeholder,li);li.style.display='none';
+  },{passive:true});
+  handle.addEventListener('touchmove',e=>{
+    if(!clone)return;e.preventDefault();
+    const ty=e.touches[0].clientY,dy=ty-startY;
+    clone.style.top=(parseFloat(clone.style.top)+dy)+'px';startY=ty;
+    const sibs=Array.from(listEl.querySelectorAll('.item-row:not([style*="display: none"])'));
+    let target=null,ins=true;
+    for(const s of sibs){if(s===placeholder)continue;const r=s.getBoundingClientRect(),mid=r.top+r.height/2;if(ty<mid){target=s;ins=true;break;}else{target=s;ins=false;}}
+    if(target){if(ins)listEl.insertBefore(placeholder,target);else listEl.insertBefore(placeholder,target.nextSibling);}else listEl.appendChild(placeholder);
+  },{passive:false});
+  const end=()=>{if(!clone)return;document.body.removeChild(clone);clone=null;li.style.display='';placeholder.parentNode.insertBefore(li,placeholder);placeholder.remove();placeholder=null;scheduleSave();};
+  handle.addEventListener('touchend',end);handle.addEventListener('touchcancel',end);
 }
 
 /* ============================================================
    EDIT MODAL
 ============================================================ */
-const editModal = { targetEl: null, type: null, icon: '✨', who: 'shared' };
+const editModal={targetEl:null,type:null,icon:'✨',who:'shared'};
 
-function populateCatSelect(currentCat) {
-  const sel = document.getElementById('editCatSelect');
-  sel.innerHTML = '<option value="">No category</option>';
-  CATEGORIES.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c.name;
-    opt.textContent = c.icon + ' ' + c.name;
-    if (c.name === currentCat) opt.selected = true;
-    sel.appendChild(opt);
-  });
-}
+function openEditModal(btn,type){
+  const liEl=btn.closest?.('.item-row');
+  const wishEl=btn.closest?.('.wish-item');
+  const el=liEl||wishEl;
+  if(!el)return;
+  const resolvedType=type||(liEl?'item':'wish');
+  editModal.targetEl=el;editModal.type=resolvedType;
 
-function populateAssignSelect() {
-  const sel = document.getElementById('editAssignSelect');
-  sel.innerHTML = '<option value="">— keep in current section —</option><option value="someday">Someday</option>';
-  for (let n = 1; n <= monthCount; n++) {
-    const opt = document.createElement('option');
-    opt.value = String(n);
-    opt.textContent = monthName(n);
-    sel.appendChild(opt);
-  }
-}
-
-function openEditModal(btn, type) {
-  // type: 'item' (month/future rows), 'wish' (wishlist cards)
-  // If called from item-row buttons, btn is the button element
-  // Detect type from context if not passed
-  const liEl   = btn.closest?.('.item-row');
-  const wishEl = btn.closest?.('.wish-item');
-  const el = liEl || wishEl;
-  if (!el) return;
-
-  const resolvedType = type || (liEl ? 'item' : 'wish');
-  editModal.targetEl = el;
-  editModal.type     = resolvedType;
-
-  if (resolvedType === 'wish') {
-    const wishTextEl = el.querySelector('.wish-text');
-    const catPillEl  = wishTextEl?.querySelector('.item-cat');
-    const cleanText  = catPillEl
-      ? (wishTextEl.textContent||'').replace(catPillEl.textContent,'').trim()
-      : (wishTextEl?.textContent.trim()||'');
-    editModal.icon = el.querySelector('.wish-icon')?.textContent.trim() || '🌟';
-    editModal.who  = 'shared';
-    document.getElementById('editModalTitle').textContent = 'Edit wish item';
-    document.getElementById('editIconDisp').textContent = editModal.icon;
-    document.getElementById('editText').value = cleanText;
-    document.getElementById('editCC').checked = false;
-    document.getElementById('editCW').classList.remove('show');
-    document.getElementById('editWhoGroup').style.display = 'none';
-    document.getElementById('editAssignRow').style.display = 'block';
-    populateCatSelect(el.dataset.cat || '');
-    populateAssignSelect();
-    document.getElementById('editAssignSelect').value = '';
-  } else {
-    // item row (month or future)
-    editModal.icon = el.dataset.icon || '✨';
-    editModal.who  = el.dataset.who  || 'shared';
-    const text = el.querySelector('.item-text')?.textContent.trim() || '';
-    const cost = el.dataset.cost || '';
-    const isFuture = !!el.closest('#futureList');
-    document.getElementById('editModalTitle').textContent = 'Edit item';
-    document.getElementById('editIconDisp').textContent = editModal.icon;
-    document.getElementById('editText').value = text;
-    document.getElementById('editCC').checked = !!(cost && parseFloat(cost)>0);
-    document.getElementById('editCA').value = cost || '';
-    document.getElementById('editCW').classList.toggle('show', !!(cost && parseFloat(cost)>0));
-    document.getElementById('editWhoGroup').style.display = 'flex';
+  if(resolvedType==='wish'){
+    const wtEl=el.querySelector('.wish-text');
+    const catPil=wtEl?.querySelector('.item-cat');
+    const clean=catPil?(wtEl.textContent||'').replace(catPil.textContent,'').trim():(wtEl?.textContent.trim()||'');
+    editModal.icon=el.querySelector('.wish-icon')?.textContent.trim()||'🌟';editModal.who='shared';
+    document.getElementById('editModalTitle').textContent='Edit wish item';
+    document.getElementById('editIconDisp').textContent=editModal.icon;
+    document.getElementById('editText').value=clean;
+    document.getElementById('editCC').checked=false;document.getElementById('editCW').classList.remove('show');
+    document.getElementById('editWhoGroup').style.display='none';
+    document.getElementById('editAssignRow').style.display='block';
+    populateCatSelect('editCatSelect',el.dataset.cat||'');populateAssignSelect();
+    document.getElementById('editAssignSelect').value='';
+  }else{
+    editModal.icon=el.dataset.icon||'✨';editModal.who=el.dataset.who||'shared';
+    const text=el.querySelector('.item-text')?.textContent.trim()||'';
+    const cost=el.dataset.cost||'';
+    const isFuture=!!el.closest('#futureList');
+    document.getElementById('editModalTitle').textContent='Edit item';
+    document.getElementById('editIconDisp').textContent=editModal.icon;
+    document.getElementById('editText').value=text;
+    document.getElementById('editCC').checked=!!(cost&&parseFloat(cost)>0);
+    document.getElementById('editCA').value=cost||'';
+    document.getElementById('editCW').classList.toggle('show',!!(cost&&parseFloat(cost)>0));
+    document.getElementById('editWhoGroup').style.display='flex';
     setEditWho(editModal.who);
-    populateCatSelect(el.dataset.cat || '');
-    // Show assign row for future (Someday) items only
-    if (isFuture) {
-      document.getElementById('editAssignRow').style.display = 'block';
-      populateAssignSelect();
-      document.getElementById('editAssignSelect').value = '';
-    } else {
-      document.getElementById('editAssignRow').style.display = 'none';
-    }
+    populateCatSelect('editCatSelect',el.dataset.cat||'');
+    document.getElementById('editAssignRow').style.display=isFuture?'block':'none';
+    if(isFuture){populateAssignSelect();document.getElementById('editAssignSelect').value='';}
   }
   document.getElementById('editModal').classList.add('open');
 }
 
-function closeEditModal() {
-  document.getElementById('editModal').classList.remove('open');
-  editModal.targetEl = null;
-}
+function closeEditModal(){document.getElementById('editModal').classList.remove('open');editModal.targetEl=null;}
+function setEditWho(w){editModal.who=w;['ryan','louise','shared'].forEach(x=>document.getElementById('ew-'+x).classList.toggle('active',x===w));}
+function toggleEditCost(){document.getElementById('editCW').classList.toggle('show',document.getElementById('editCC').checked);}
 
-function setEditWho(w) {
-  editModal.who = w;
-  ['ryan','louise','shared'].forEach(x => document.getElementById('ew-'+x).classList.toggle('active', x===w));
-}
+function saveEditModal(){
+  const el=editModal.targetEl;if(!el)return;
+  const text=document.getElementById('editText').value.trim();if(!text)return;
+  const catName=document.getElementById('editCatSelect').value;
+  const assignTo=document.getElementById('editAssignSelect').value;
+  const c=catName?CATEGORIES.find(x=>x.name===catName):null;
+  const newIcon=c?c.icon:editModal.icon;
 
-function toggleEditCost() {
-  const chk = document.getElementById('editCC');
-  document.getElementById('editCW').classList.toggle('show', chk.checked);
-}
-
-function saveEditModal() {
-  const el = editModal.targetEl; if (!el) return;
-  const text = document.getElementById('editText').value.trim(); if (!text) return;
-  const catName  = document.getElementById('editCatSelect').value;
-  const assignTo = document.getElementById('editAssignSelect').value;
-  const c = catName ? CATEGORIES.find(x => x.name === catName) : null;
-  const newIcon  = c ? c.icon : editModal.icon;
-
-  if (editModal.type === 'wish') {
-    // Update wish icon, text, cat badge
-    el.querySelector('.wish-icon').textContent = newIcon;
-    el.dataset.cat  = catName;
-    el.dataset.icon = newIcon;
-    const wishTextEl = el.querySelector('.wish-text');
-    const catPillEl  = wishTextEl?.querySelector('.item-cat');
-    if (catPillEl) catPillEl.remove();
-    wishTextEl.textContent = text;
-    if (c) {
-      const pill = document.createElement('span');
-      pill.className = 'item-cat';
-      pill.style.cssText = `background:${c.bg};color:${c.fg}`;
-      pill.textContent = `${c.icon} ${c.name}`;
-      wishTextEl.appendChild(pill);
-    }
-    // Assign to month/someday if chosen
-    if (assignTo) {
-      if (assignTo === 'someday') {
+  if(editModal.type==='wish'){
+    el.querySelector('.wish-icon').textContent=newIcon;
+    el.dataset.cat=catName;el.dataset.icon=newIcon;
+    const wtEl=el.querySelector('.wish-text');
+    const old=wtEl?.querySelector('.item-cat');if(old)old.remove();
+    wtEl.textContent=text;
+    if(c){const pill=document.createElement('span');pill.className='item-cat';pill.style.cssText=`background:${c.bg};color:${c.fg}`;pill.textContent=`${c.icon} ${c.name}`;wtEl.appendChild(pill);}
+    if(assignTo){
+      if(assignTo==='someday'){
         document.getElementById('futureList').appendChild(makeLi(newIcon,'shared',text,null,catName));
-        const badgeHTML = `<span class="wish-badge">Added to Someday</span>`;
-        const existingSub = el.querySelector('.wish-sub'); const existingBadge = el.querySelector('.wish-badge');
-        if (existingSub) existingSub.outerHTML = badgeHTML; else if (existingBadge) existingBadge.outerHTML = badgeHTML;
-        el.classList.add('assigned');
-      } else {
-        const n = parseInt(assignTo);
-        const targetYear = yearOfMonth(n);
-        const doAssign = () => {
-          const list = document.getElementById('list-'+n);
-          if (list) { list.appendChild(makeLi(newIcon,'shared',text,null,catName)); document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open'); }
-          const badgeHTML = `<span class="wish-badge">Added to ${monthName(n)}</span>`;
-          const existingSub = el.querySelector('.wish-sub'); const existingBadge = el.querySelector('.wish-badge');
-          if (existingSub) existingSub.outerHTML = badgeHTML; else if (existingBadge) existingBadge.outerHTML = badgeHTML;
-          el.classList.add('assigned');
-        };
-        if (targetYear !== activeYear) { switchYear(targetYear); setTimeout(doAssign, 60); }
-        else doAssign();
+        updateWishBadge(el,'Someday');
+      }else{
+        const n=parseInt(assignTo),ty=yearOfMonth(n);
+        const doIt=()=>{const list=document.getElementById('list-'+n);if(list){list.appendChild(makeLi(newIcon,'shared',text,null,catName));document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open');}updateWishBadge(el,monthName(n));};
+        if(ty!==activeYear){switchYear(ty);setTimeout(doIt,60);}else doIt();
       }
     }
-  } else {
-    // item row
-    const chk  = document.getElementById('editCC');
-    const cost = chk.checked ? document.getElementById('editCA').value : null;
-    const who  = editModal.who;
-    el.dataset.icon = newIcon;
-    el.dataset.who  = who;
-    el.dataset.cost = cost || '';
-    el.dataset.cat  = catName;
-    el.querySelector('.item-icon').textContent = newIcon;
-    el.querySelector('.item-text').textContent = text;
-    const oldDot = el.querySelector('.item-dot');
-    if (oldDot) oldDot.className = `item-dot ${who}`;
-    const oldCost = el.querySelector('.item-cost-tag'); if (oldCost) oldCost.remove();
-    if (cost && parseFloat(cost)>0) {
-      const tag = document.createElement('span'); tag.className = 'item-cost-tag';
-      tag.textContent = `€${parseFloat(cost).toLocaleString('en-IE',{minimumFractionDigits:0,maximumFractionDigits:2})}`;
-      el.querySelector('.item-main').appendChild(tag);
-    }
-    // Update cat pill
-    const oldCat = el.querySelector('.item-cat'); if (oldCat) oldCat.remove();
-    if (c) {
-      const pill = document.createElement('span'); pill.className = 'item-cat';
-      pill.style.cssText = `background:${c.bg};color:${c.fg}`;
-      pill.textContent = `${c.icon} ${c.name}`;
-      el.querySelector('.item-text').insertAdjacentElement('afterend', pill);
-    }
-    // Move to month if assigned (future items)
-    if (assignTo && assignTo !== '') {
-      if (assignTo === 'someday') {
-        el.remove();
-        document.getElementById('futureList').appendChild(makeLi(newIcon,who,text,cost,catName));
-      } else {
-        const n = parseInt(assignTo);
-        const targetYear = yearOfMonth(n);
-        const item = { icon:newIcon, who, text, cost, cat:catName };
-        el.remove();
-        const doMove = () => {
-          const list = document.getElementById('list-'+n);
-          if (list) { list.appendChild(makeLi(item.icon,item.who,item.text,item.cost,item.cat)); document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open'); }
-        };
-        if (targetYear !== activeYear) { switchYear(targetYear); setTimeout(doMove, 60); }
-        else doMove();
-      }
+  }else{
+    const chk=document.getElementById('editCC');
+    const cost=chk.checked?document.getElementById('editCA').value:null;
+    const who=editModal.who;
+    el.dataset.icon=newIcon;el.dataset.who=who;el.dataset.cost=cost||'';el.dataset.cat=catName;
+    el.querySelector('.item-icon').textContent=newIcon;
+    el.querySelector('.item-text').textContent=text;
+    const oldDot=el.querySelector('.item-dot');if(oldDot)oldDot.className=`item-dot ${who}`;
+    const oldCost=el.querySelector('.item-cost-tag');if(oldCost)oldCost.remove();
+    if(cost&&parseFloat(cost)>0){const tag=document.createElement('span');tag.className='item-cost-tag';tag.textContent=`€${parseFloat(cost).toLocaleString('en-IE',{minimumFractionDigits:0,maximumFractionDigits:2})}`;el.querySelector('.item-main').appendChild(tag);}
+    const oldCat=el.querySelector('.item-cat');if(oldCat)oldCat.remove();
+    if(c){const pill=document.createElement('span');pill.className='item-cat';pill.style.cssText=`background:${c.bg};color:${c.fg}`;pill.textContent=`${c.icon} ${c.name}`;el.querySelector('.item-text').insertAdjacentElement('afterend',pill);}
+    if(assignTo&&assignTo!==''){
+      if(assignTo==='someday'){el.remove();document.getElementById('futureList').appendChild(makeLi(newIcon,who,text,cost,catName));}
+      else{const n=parseInt(assignTo),ty=yearOfMonth(n),item={icon:newIcon,who,text,cost,cat:catName};el.remove();const doMove=()=>{const list=document.getElementById('list-'+n);if(list){list.appendChild(makeLi(item.icon,item.who,item.text,item.cost,item.cat));document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open');}};if(ty!==activeYear){switchYear(ty);setTimeout(doMove,60);}else doMove();}
     }
   }
-  closeEditModal();
-  scheduleSave();
+  closeEditModal();scheduleSave();
 }
 
-document.getElementById('editModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('editModal')) closeEditModal();
+document.getElementById('editModal').addEventListener('mousedown',e=>{if(e.target===document.getElementById('editModal'))closeEditModal();});
+
+/* ============================================================
+   CONTEXT MENU
+============================================================ */
+const ctxMenu=document.getElementById('ctxMenu');
+const ctx={target:null,type:null};
+
+document.getElementById('ctxDeleteBtn').addEventListener('click',()=>{
+  if(ctx.target){
+    const id=ctx.target.dataset.dbid;
+    if(id)deleteItem(id);
+    ctx.target.remove();
+    scheduleSave();
+  }
+  closeCtxMenu();
 });
 
-/* ============================================================
-   CATEGORIES
-============================================================ */
-const CATEGORIES = [
-  {name:'Holiday',       icon:'✈️', bg:'#E8F0FB', fg:'#2a5a9c'},
-  {name:'Weekend away',  icon:'🚗', bg:'#EDF6EE', fg:'#2d6e35'},
-  {name:'Home',          icon:'🏠', bg:'#FDF0E8', fg:'#9c4a1a'},
-  {name:'Finance',       icon:'💰', bg:'#FDF7E4', fg:'#7a5c0a'},
-  {name:'Saving goal',   icon:'🏦', bg:'#E8F5F0', fg:'#1a6e54'},
-  {name:'Health',        icon:'💪', bg:'#FCE8F0', fg:'#8c1a4a'},
-  {name:'Fitness',       icon:'🏃', bg:'#EDE8FC', fg:'#4a2a9c'},
-  {name:'Social',        icon:'🎉', bg:'#FFF0E0', fg:'#8c4e00'},
-  {name:'Date night',    icon:'❤️', bg:'#FCE8E8', fg:'#8c1a1a'},
-  {name:'Family',        icon:'🤝', bg:'#F0F8FF', fg:'#1a4a7a'},
-  {name:'Career',        icon:'💼', bg:'#F0F0F8', fg:'#2a2a7a'},
-  {name:'Learning',      icon:'📖', bg:'#FFF8E8', fg:'#7a5000'},
-  {name:'Project',       icon:'🛠️', bg:'#F4F0EC', fg:'#5c3a00'},
-  {name:'Creative',      icon:'🎨', bg:'#FFF0F8', fg:'#7a0060'},
-  {name:'Music',         icon:'🎵', bg:'#F8F0FF', fg:'#5a0080'},
-  {name:'Gaming',        icon:'🎮', bg:'#E8F0FF', fg:'#1a3a8c'},
-  {name:'Food & Drink',  icon:'🍕', bg:'#FFF0E8', fg:'#8c3000'},
-  {name:'Nature',        icon:'🌱', bg:'#EDF8ED', fg:'#1a6a1a'},
-  {name:'Adventure',     icon:'🏔️', bg:'#E8F4F8', fg:'#0a4a5a'},
-  {name:'Beach',         icon:'🏖️', bg:'#FFF8E0', fg:'#7a5500'},
-  {name:'Big milestone', icon:'🎯', bg:'#F8F0E8', fg:'#7a3a00'},
-  {name:'Celebration',   icon:'🎂', bg:'#FFF0F4', fg:'#8c005a'},
-  {name:'Gift',          icon:'🎁', bg:'#F4F0FF', fg:'#5a1a8c'},
-  {name:'Wedding',       icon:'💍', bg:'#FFF8F8', fg:'#8c1a1a'},
-  {name:'Moving',        icon:'🗺️', bg:'#F0F8FC', fg:'#0a4a6a'},
-  {name:'Pet',           icon:'🐶', bg:'#FFF4E8', fg:'#7a3a00'},
-  {name:'Idea',          icon:'💡', bg:'#FFFFF0', fg:'#6a6a00'},
-  {name:'Event',         icon:'📅', bg:'#F0F4FF', fg:'#1a2a8c'},
-  {name:'Wishlist',      icon:'🌟', bg:'#FFFFF4', fg:'#7a6a00'},
-];
+function openCtxMenu(e,el,type){
+  e.preventDefault();e.stopPropagation();
+  ctx.target=el;ctx.type=type;
+  const scroll=document.getElementById('ctxScroll');
+  scroll.innerHTML='';
 
-/* ============================================================
-   CONTEXT MENU — colon button / long press / right click
-============================================================ */
-const ctxMenu = document.getElementById('ctxMenu');
-const ctx = { target: null, type: null };
-
-function openCtxMenu(e, el, type) {
-  e.preventDefault();
-  e.stopPropagation();
-  ctx.target = el;
-  ctx.type   = type;
-
-  const scroll = document.getElementById('ctxScroll');
-  scroll.innerHTML = '';
-
-  // ── MOVE TO MONTH section ──
-  const mHead = document.createElement('div');
-  mHead.className = 'ctx-header';
-  mHead.textContent = 'Move to month';
-  scroll.appendChild(mHead);
-
-  for (let n = 1; n <= monthCount; n++) {
-    const monthList = document.getElementById('list-'+n);
-    const already = type === 'item' && monthList && monthList.contains(el);
-    const div = document.createElement('div');
-    div.className = 'ctx-item';
-    div.innerHTML = `<span class="ctx-icon">📅</span><span>${monthName(n)}</span>${already?'<span class="ctx-badge">here</span>':''}`;
-    if (already) { div.style.opacity='0.45'; div.style.cursor='default'; }
-    else div.addEventListener('click', () => ctxMoveToMonth(n));
+  // Move to month
+  const mh=document.createElement('div');mh.className='ctx-header';mh.textContent='Move to month';scroll.appendChild(mh);
+  for(let n=1;n<=monthCount;n++){
+    const ml=document.getElementById('list-'+n);
+    const already=type==='item'&&ml&&ml.contains(el);
+    const div=document.createElement('div');div.className='ctx-item';
+    div.innerHTML=`<span class="ctx-icon">📅</span><span>${monthName(n)}</span>${already?'<span class="ctx-badge">here</span>':''}`;
+    if(already){div.style.opacity='0.45';div.style.cursor='default';}
+    else div.addEventListener('click',()=>ctxMoveToMonth(n));
     scroll.appendChild(div);
   }
-  // Also "Someday"
-  const futDiv = document.createElement('div');
-  futDiv.className = 'ctx-item';
-  futDiv.innerHTML = `<span class="ctx-icon">🔮</span><span>Someday</span>`;
-  futDiv.addEventListener('click', () => ctxMoveToFuture());
-  scroll.appendChild(futDiv);
+  const fd=document.createElement('div');fd.className='ctx-item';fd.innerHTML=`<span class="ctx-icon">🔮</span><span>Someday</span>`;fd.addEventListener('click',()=>ctxMoveToFuture());scroll.appendChild(fd);
 
-  // ── CATEGORY section ──
-  const cHead = document.createElement('div');
-  cHead.className = 'ctx-header';
-  cHead.textContent = 'Set category';
-  scroll.appendChild(cHead);
-
-  const currentCat = el.dataset.cat || '';
-  const clearDiv = document.createElement('div');
-  clearDiv.className = 'ctx-item';
-  clearDiv.innerHTML = `<span class="ctx-icon">✕</span><span>No category</span>${!currentCat?'<span class="ctx-badge">current</span>':''}`;
-  clearDiv.addEventListener('click', () => ctxSetCategory(''));
-  scroll.appendChild(clearDiv);
-
-  CATEGORIES.forEach(c => {
-    const div = document.createElement('div');
-    div.className = 'ctx-item';
-    const active = currentCat === c.name;
-    div.innerHTML = `<span class="ctx-icon">${c.icon}</span><span>${c.name}</span>${active?'<span class="ctx-badge">current</span>':''}`;
-    if (active) div.style.fontWeight = '500';
-    div.addEventListener('click', () => ctxSetCategory(c.name));
+  // Categories
+  const ch=document.createElement('div');ch.className='ctx-header';ch.textContent='Set category';scroll.appendChild(ch);
+  const cur=el.dataset.cat||'';
+  const clr=document.createElement('div');clr.className='ctx-item';clr.innerHTML=`<span class="ctx-icon">✕</span><span>No category</span>${!cur?'<span class="ctx-badge">current</span>':''}`;clr.addEventListener('click',()=>ctxSetCategory(''));scroll.appendChild(clr);
+  CATEGORIES.forEach(c=>{
+    const div=document.createElement('div');div.className='ctx-item';
+    const active=cur===c.name;
+    div.innerHTML=`<span class="ctx-icon">${c.icon}</span><span>${c.name}</span>${active?'<span class="ctx-badge">current</span>':''}`;
+    if(active)div.style.fontWeight='500';
+    div.addEventListener('click',()=>ctxSetCategory(c.name));
     scroll.appendChild(div);
   });
 
   // Position
-  const x = e.clientX || (e.touches?.[0]?.clientX) || 100;
-  const y = e.clientY || (e.touches?.[0]?.clientY) || 100;
-  const menuW = 264, menuH = 420;
-  ctxMenu.style.left = Math.min(x, window.innerWidth  - menuW - 10) + 'px';
-  ctxMenu.style.top  = Math.min(y + window.scrollY, window.scrollY + window.innerHeight - menuH - 20) + 'px';
+  const x=e.clientX||(e.touches?.[0]?.clientX)||100;
+  const y=e.clientY||(e.touches?.[0]?.clientY)||100;
+  ctxMenu.style.left=Math.min(x,window.innerWidth-270)+'px';
+  ctxMenu.style.top=Math.min(y+window.scrollY,window.scrollY+window.innerHeight-430)+'px';
   ctxMenu.classList.add('open');
 }
 
-function ctxMoveToMonth(n) {
-  const el = ctx.target; if (!el) return;
-  closeCtxMenu();
-  const targetYear = yearOfMonth(n);
+function closeCtxMenu(){ctxMenu.classList.remove('open');ctx.target=null;ctx.type=null;}
+document.addEventListener('mousedown',e=>{if(ctxMenu.classList.contains('open')&&!ctxMenu.contains(e.target))closeCtxMenu();});
+document.addEventListener('touchstart',e=>{if(ctxMenu.classList.contains('open')&&!ctxMenu.contains(e.target))closeCtxMenu();},{passive:true});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCtxMenu();closeEditModal();}});
 
-  if (ctx.type === 'wish') {
-    // Extract clean text (strip cat pill child text from wish-text)
-    const wishTextEl = el.querySelector('.wish-text');
-    const catPillEl  = wishTextEl?.querySelector('.item-cat');
-    const cleanText  = catPillEl
-      ? (wishTextEl.textContent||'').replace(catPillEl.textContent,'').trim()
-      : (wishTextEl?.textContent.trim()||'');
-    const icon = el.querySelector('.wish-icon')?.textContent.trim() || '🌟';
-    const cat  = el.dataset.cat || '';
+function updateWishBadge(el,where){
+  const s=el.querySelector('.wish-sub');const b=el.querySelector('.wish-badge');
+  const html=`<span class="wish-badge">Added to ${where}</span>`;
+  if(s)s.outerHTML=html;else if(b)b.outerHTML=html;
+  el.classList.add('assigned');
+}
 
-    const doAssign = () => {
-      const list = document.getElementById('list-'+n);
-      if (!list) return;
-      list.appendChild(makeLi(icon, 'shared', cleanText, null, cat));
-      document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open');
-      // Update the wish badge — find the sub/badge container (second div inside the flex child)
-      const subContainer = el.querySelector('[data-sub-container]') || el.querySelector('div > div:last-child') || el.querySelector('.wish-sub')?.parentElement;
-      // Simpler: just replace any .wish-sub or .wish-badge inside the item
-      const existingSub   = el.querySelector('.wish-sub');
-      const existingBadge = el.querySelector('.wish-badge');
-      const badgeHTML = `<span class="wish-badge">Added to ${monthName(n)}</span>`;
-      if (existingSub)        existingSub.outerHTML   = badgeHTML;
-      else if (existingBadge) existingBadge.outerHTML = badgeHTML;
-      el.classList.add('assigned');
-      scheduleSave();
-    };
-
-    if (targetYear !== activeYear) { switchYear(targetYear); setTimeout(doAssign, 60); }
-    else doAssign();
-
-  } else {
-    // Move item row
-    const item = {
-      icon: el.dataset.icon||'✨', who: el.dataset.who||'shared',
-      text: el.querySelector('.item-text')?.textContent.trim()||'',
-      cost: el.dataset.cost||null, cat: el.dataset.cat||''
-    };
+function ctxMoveToMonth(n){
+  const el=ctx.target;if(!el)return;closeCtxMenu();
+  const ty=yearOfMonth(n);
+  if(ctx.type==='wish'){
+    const wtEl=el.querySelector('.wish-text');const catPil=wtEl?.querySelector('.item-cat');
+    const clean=catPil?(wtEl.textContent||'').replace(catPil.textContent,'').trim():(wtEl?.textContent.trim()||'');
+    const icon=el.querySelector('.wish-icon')?.textContent.trim()||'🌟';const cat=el.dataset.cat||'';
+    const doIt=()=>{const list=document.getElementById('list-'+n);if(list){list.appendChild(makeLi(icon,'shared',clean,null,cat));document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open');}updateWishBadge(el,monthName(n));scheduleSave();};
+    if(ty!==activeYear){switchYear(ty);setTimeout(doIt,60);}else doIt();
+  }else{
+    const item={icon:el.dataset.icon||'✨',who:el.dataset.who||'shared',text:el.querySelector('.item-text')?.textContent.trim()||'',cost:el.dataset.cost||null,cat:el.dataset.cat||''};
     el.remove();
-    const doMove = () => {
-      const list = document.getElementById('list-'+n);
-      if (list) { list.appendChild(makeLi(item.icon,item.who,item.text,item.cost,item.cat)); document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open'); scheduleSave(); }
-    };
-    if (targetYear !== activeYear) { switchYear(targetYear); setTimeout(doMove, 60); }
-    else doMove();
+    const doMove=()=>{const list=document.getElementById('list-'+n);if(list){list.appendChild(makeLi(item.icon,item.who,item.text,item.cost,item.cat));document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open');}scheduleSave();};
+    if(ty!==activeYear){switchYear(ty);setTimeout(doMove,60);}else doMove();
   }
 }
 
-function ctxMoveToFuture() {
-  const el = ctx.target; if (!el) return;
-  closeCtxMenu();
-  if (ctx.type === 'wish') {
-    const wishTextEl = el.querySelector('.wish-text');
-    const catPillEl  = wishTextEl?.querySelector('.item-cat');
-    const cleanText  = catPillEl
-      ? (wishTextEl.textContent||'').replace(catPillEl.textContent,'').trim()
-      : (wishTextEl?.textContent.trim()||'');
-    const icon = el.querySelector('.wish-icon')?.textContent.trim()||'🌟';
-    document.getElementById('futureList').appendChild(makeLi(icon,'shared',cleanText,null,el.dataset.cat||''));
-    const existingSub   = el.querySelector('.wish-sub');
-    const existingBadge = el.querySelector('.wish-badge');
-    const badgeHTML = `<span class="wish-badge">Added to Someday</span>`;
-    if (existingSub)        existingSub.outerHTML   = badgeHTML;
-    else if (existingBadge) existingBadge.outerHTML = badgeHTML;
-    el.classList.add('assigned');
-  } else {
-    const item = { icon:el.dataset.icon||'✨', who:el.dataset.who||'shared', text:el.querySelector('.item-text')?.textContent.trim()||'', cost:el.dataset.cost||null, cat:el.dataset.cat||'' };
-    el.remove();
-    document.getElementById('futureList').appendChild(makeLi(item.icon,item.who,item.text,item.cost,item.cat));
+function ctxMoveToFuture(){
+  const el=ctx.target;if(!el)return;closeCtxMenu();
+  if(ctx.type==='wish'){
+    const wtEl=el.querySelector('.wish-text');const catPil=wtEl?.querySelector('.item-cat');
+    const clean=catPil?(wtEl.textContent||'').replace(catPil.textContent,'').trim():(wtEl?.textContent.trim()||'');
+    document.getElementById('futureList').appendChild(makeLi(el.querySelector('.wish-icon')?.textContent.trim()||'🌟','shared',clean,null,el.dataset.cat||''));
+    updateWishBadge(el,'Someday');
+  }else{
+    const item={icon:el.dataset.icon||'✨',who:el.dataset.who||'shared',text:el.querySelector('.item-text')?.textContent.trim()||'',cost:el.dataset.cost||null,cat:el.dataset.cat||''};
+    el.remove();document.getElementById('futureList').appendChild(makeLi(item.icon,item.who,item.text,item.cost,item.cat));
   }
   scheduleSave();
 }
 
-function ctxSetCategory(catName) {
-  const el = ctx.target; if (!el) return;
-  closeCtxMenu();
-  el.dataset.cat = catName;
-  const c = catName ? CATEGORIES.find(x=>x.name===catName) : null;
-
-  if (ctx.type === 'item') {
-    // Update icon
-    if (c) el.querySelector('.item-icon').textContent = c.icon;
-    el.dataset.icon = c ? c.icon : (el.dataset.icon || '✨');
-    // Update/remove cat pill
-    const old = el.querySelector('.item-cat'); if(old) old.remove();
-    if (c) {
-      const pill = document.createElement('span');
-      pill.className = 'item-cat';
-      pill.style.cssText = `background:${c.bg};color:${c.fg}`;
-      pill.textContent = `${c.icon} ${c.name}`;
-      el.querySelector('.item-text').insertAdjacentElement('afterend', pill);
-    }
-  } else {
-    // Wishlist item
-    if (c) el.querySelector('.wish-icon').textContent = c.icon;
-    const old = el.querySelector('.item-cat'); if(old) old.remove();
-    if (c) {
-      const pill = document.createElement('span');
-      pill.className = 'item-cat';
-      pill.style.cssText = `background:${c.bg};color:${c.fg}`;
-      pill.textContent = `${c.icon} ${c.name}`;
-      el.querySelector('.wish-text').appendChild(pill);
-    }
+function ctxSetCategory(catName){
+  const el=ctx.target;if(!el)return;closeCtxMenu();
+  el.dataset.cat=catName;const c=catName?CATEGORIES.find(x=>x.name===catName):null;
+  const newIcon=c?c.icon:(el.dataset.icon||'✨');
+  if(ctx.type==='item'){
+    el.querySelector('.item-icon').textContent=newIcon;el.dataset.icon=newIcon;
+    const old=el.querySelector('.item-cat');if(old)old.remove();
+    if(c){const pill=document.createElement('span');pill.className='item-cat';pill.style.cssText=`background:${c.bg};color:${c.fg}`;pill.textContent=`${c.icon} ${c.name}`;el.querySelector('.item-text').insertAdjacentElement('afterend',pill);}
+  }else{
+    el.querySelector('.wish-icon').textContent=newIcon;
+    const old=el.querySelector('.item-cat');if(old)old.remove();
+    if(c){const pill=document.createElement('span');pill.className='item-cat';pill.style.cssText=`background:${c.bg};color:${c.fg}`;pill.textContent=`${c.icon} ${c.name}`;el.querySelector('.wish-text').appendChild(pill);}
   }
   scheduleSave();
 }
-
-function ctxDelete() {
-  const el = ctx.target; if (!el) return;
-  el.remove();
-  closeCtxMenu();
-  scheduleSave();
-}
-
-function closeCtxMenu() {
-  ctxMenu.classList.remove('open');
-  ctx.target = null; ctx.type = null;
-}
-
-document.addEventListener('mousedown', e => { if (ctxMenu.classList.contains('open') && !ctxMenu.contains(e.target)) closeCtxMenu(); });
-document.addEventListener('touchstart', e => { if (ctxMenu.classList.contains('open') && !ctxMenu.contains(e.target)) closeCtxMenu(); }, {passive:true});
-document.addEventListener('keydown',    e => { if (e.key === 'Escape') closeCtxMenu(); });
 
 /* ============================================================
-   FUTURE
+   FUTURE / SOMEDAY
 ============================================================ */
-function setFWho(w) {
-  ui.futureWho = w;
-  ['ryan','louise','shared'].forEach(x=>document.getElementById('fw-'+x).classList.toggle('active',x===w));
-}
+function setFWho(w){ui.futureWho=w;['ryan','louise','shared'].forEach(x=>document.getElementById('fw-'+x).classList.toggle('active',x===w));}
 
-function addFuture() {
-  const inp = document.getElementById('futureInput');
-  const txt = inp.value.trim(); if(!txt) return;
-  const chk = document.getElementById('fCC');
-  const cost = chk.checked ? document.getElementById('fCA').value : null;
-  document.getElementById('futureList').appendChild(makeLi(ui.futureIcon, ui.futureWho, txt, cost));
-  inp.value=''; document.getElementById('fCA').value='';
-  chk.checked=false; document.getElementById('fCW').classList.remove('show');
+function addFuture(){
+  const inp=document.getElementById('futureInput');const txt=inp.value.trim();if(!txt)return;
+  const chk=document.getElementById('fCC');const cost=chk.checked?document.getElementById('fCA').value:null;
+  document.getElementById('futureList').appendChild(makeLi(ui.futureIcon,ui.futureWho,txt,cost,''));
+  inp.value='';document.getElementById('fCA').value='';chk.checked=false;document.getElementById('fCW').classList.remove('show');
   scheduleSave();
 }
 
-function futureDragOver(e)  { if(!ui.dragId||ui.reorderDragEl) return; e.preventDefault(); document.getElementById('futureCard').classList.add('drag-over'); }
-function futureDragLeave(e) { const c=document.getElementById('futureCard'); if(!c.contains(e.relatedTarget)) c.classList.remove('drag-over'); }
-function futureDrop(e) {
+function futureDragOver(e){if(!ui.dragId||ui.reorderDragEl)return;e.preventDefault();document.getElementById('futureCard').classList.add('drag-over');}
+function futureDragLeave(e){const c=document.getElementById('futureCard');if(!c.contains(e.relatedTarget))c.classList.remove('drag-over');}
+function futureDrop(e){
   document.getElementById('futureCard').classList.remove('drag-over');
-  if(!ui.dragId||ui.reorderDragEl) return;
-  e.preventDefault();
-  const wish = getWishById(ui.dragId); if(!wish) return;
+  if(!ui.dragId||ui.reorderDragEl)return;e.preventDefault();
+  const wish=getWishById(ui.dragId);if(!wish)return;
   document.getElementById('futureList').appendChild(makeLi(wish.icon,'shared',wish.text,null,wish.cat||''));
-  assignWish(ui.dragId,'Someday');
-  ui.dragId=null; scheduleSave();
+  assignWish(ui.dragId,'Someday');ui.dragId=null;scheduleSave();
+}
+
+function buildFutureList(items){
+  const list=document.getElementById('futureList');list.innerHTML='';
+  (items||[]).forEach(item=>list.appendChild(makeLi(item.icon||'✨',item.who||'shared',item.text,item.cost,item.category||'',item.id)));
 }
 
 /* ============================================================
    MONTHS
 ============================================================ */
-function setMWho(n,w) {
-  ui.monthWho[n]=w;
-  ['ryan','louise','shared'].forEach(x=>document.getElementById(`mw-${x}-${n}`).classList.toggle('active',x===w));
-}
+function setMWho(n,w){ui.monthWho[n]=w;['ryan','louise','shared'].forEach(x=>document.getElementById(`mw-${x}-${n}`).classList.toggle('active',x===w));}
 
-function addMonthItem(n) {
-  const inp = document.getElementById('inp-'+n);
-  const txt = inp.value.trim(); if(!txt) return;
-  const chk = document.getElementById('cc-'+n);
-  const cost = chk.checked ? document.getElementById('ca-'+n).value : null;
-  document.getElementById('list-'+n).appendChild(makeLi(ui.monthIcon[n], ui.monthWho[n], txt, cost));
+function addMonthItem(n){
+  const inp=document.getElementById('inp-'+n);const txt=inp.value.trim();if(!txt)return;
+  const chk=document.getElementById('cc-'+n);const cost=chk.checked?document.getElementById('ca-'+n).value:null;
+  document.getElementById('list-'+n).appendChild(makeLi(ui.monthIcon[n]||'✨',ui.monthWho[n]||'shared',txt,cost,''));
   document.querySelector(`[data-month="${n}"]`).classList.add('has-content','open');
-  inp.value=''; document.getElementById('ca-'+n).value='';
-  chk.checked=false; document.getElementById('cw-'+n).classList.remove('show');
+  inp.value='';document.getElementById('ca-'+n).value='';chk.checked=false;document.getElementById('cw-'+n).classList.remove('show');
   scheduleSave();
 }
 
-function toggleMonth(header) { header.closest('.month-card').classList.toggle('open'); }
+function toggleMonth(header){header.closest('.month-card').classList.toggle('open');}
 
-/* ============================================================
-   YEAR TABS & MONTH MANAGEMENT
-============================================================ */
-function switchYear(y) {
-  activeYear = y;
-  document.getElementById('tabY1').classList.toggle('active', y===1);
-  document.getElementById('tabY2').classList.toggle('active', y===2);
+function switchYear(y){
+  activeYear=y;
+  document.getElementById('tabY1').classList.toggle('active',y===1);
+  document.getElementById('tabY2').classList.toggle('active',y===2);
   buildMonthsView();
 }
 
-function updateYearTabs() {
-  const hasY2 = monthCount > 12;
-  document.getElementById('tabY2').style.display = hasY2 ? '' : 'none';
-  if (!hasY2 && activeYear === 2) {
-    activeYear = 1;
-    document.getElementById('tabY1').classList.add('active');
-    document.getElementById('tabY2').classList.remove('active');
-  }
+function updateYearTabs(){
+  const hasY2=monthCount>12;
+  document.getElementById('tabY2').style.display=hasY2?'':'none';
+  if(!hasY2&&activeYear===2){activeYear=1;document.getElementById('tabY1').classList.add('active');document.getElementById('tabY2').classList.remove('active');}
   updateMonthCountInfo();
 }
 
-function updateMonthCountInfo() {
-  const y1count = Math.min(monthCount, 12);
-  const y2count = Math.max(0, monthCount - 12);
-  let info = `${monthCount} month${monthCount!==1?'s':''} total`;
-  if (y2count > 0) info += ` · Y1: ${y1count}, Y2: ${y2count}`;
-  document.getElementById('monthCountInfo').textContent = info;
-  document.getElementById('btnRemoveMonth').disabled = monthCount <= 1;
+function updateMonthCountInfo(){
+  const y2=Math.max(0,monthCount-12);
+  let info=`${monthCount} month${monthCount!==1?'s':''} total`;
+  if(y2>0)info+=` · Y1: ${Math.min(monthCount,12)}, Y2: ${y2}`;
+  document.getElementById('monthCountInfo').textContent=info;
+  document.getElementById('btnRemoveMonth').disabled=monthCount<=1;
 }
 
-function addNextMonth() {
-  monthCount++;
-  const n = monthCount;
-  if (!ui.monthWho[n]) ui.monthWho[n] = 'shared';
-  if (!ui.monthIcon[n]) ui.monthIcon[n] = '✨';
-  if (n === 13) {
-    document.getElementById('tabY2').style.display = '';
-    activeYear = 2;
-    document.getElementById('tabY1').classList.remove('active');
-    document.getElementById('tabY2').classList.add('active');
-  }
-  updateYearTabs();
-  buildMonthsView();
-  scheduleSave();
+function addNextMonth(){
+  monthCount++;const n=monthCount;
+  if(!ui.monthWho[n])ui.monthWho[n]='shared';if(!ui.monthIcon[n])ui.monthIcon[n]='✨';
+  if(!ui.monthItems[n])ui.monthItems[n]=[];
+  if(n===13){document.getElementById('tabY2').style.display='';activeYear=2;document.getElementById('tabY1').classList.remove('active');document.getElementById('tabY2').classList.add('active');}
+  updateYearTabs();buildMonthsView();scheduleSave();
 }
 
-function removeLastMonth() {
-  if (monthCount <= 1) return;
-  const lastList = document.getElementById('list-'+monthCount);
-  const hasItems = lastList && lastList.querySelectorAll('.item-row').length > 0;
-  if (hasItems && !confirm(`${monthName(monthCount)} has items. Remove it anyway?`)) return;
-  monthCount--;
-  updateYearTabs();
-  buildMonthsView();
-  scheduleSave();
+function removeLastMonth(){
+  if(monthCount<=1)return;
+  const lastList=document.getElementById('list-'+monthCount);
+  const hasItems=lastList&&lastList.querySelectorAll('.item-row').length>0;
+  if(hasItems&&!confirm(`${monthName(monthCount)} has items. Remove it anyway?`))return;
+  monthCount--;updateYearTabs();buildMonthsView();scheduleSave();
 }
 
-function buildMonthsView() {
-  const grid = document.getElementById('monthsGrid');
-  const currentData = {};
-  document.querySelectorAll('[data-month]').forEach(card => {
-    const n = parseInt(card.dataset.month);
-    currentData[n] = serializeList('list-'+n);
+function removeThisMonth(e,n){e.stopPropagation();if(n!==monthCount)return;removeLastMonth();}
+
+function buildMonthsView(){
+  const grid=document.getElementById('monthsGrid');
+  // Snapshot current DOM items
+  document.querySelectorAll('[data-month]').forEach(card=>{
+    const n=parseInt(card.dataset.month);
+    ui.monthItems[n]=serializeList('list-'+n);
   });
-  // Merge into ui.monthItems cache
-  if (!ui.monthItems) ui.monthItems = {};
-  Object.assign(ui.monthItems, currentData);
-  grid.innerHTML = '';
-  const start = (activeYear - 1) * 12 + 1;
-  const end   = Math.min(activeYear * 12, monthCount);
-  for (let n = start; n <= end; n++) {
-    const items = ui.monthItems[n] || [];
-    buildMonthCard(grid, n, items);
-  }
+  grid.innerHTML='';
+  const start=(activeYear-1)*12+1,end=Math.min(activeYear*12,monthCount);
+  for(let n=start;n<=end;n++) buildMonthCard(grid,n,ui.monthItems[n]||[]);
   updateMonthCountInfo();
 }
 
-function buildMonthCard(grid, n, savedItems) {
-  const hasContent = savedItems.length > 0;
-  const card = document.createElement('div');
-  card.className = 'month-card'+(hasContent?' has-content open':'');
-  card.dataset.month = n;
-  const name    = monthName(n);
-  const yearNum = yearOfMonth(n);
-  const localN  = ((n-1) % 12) + 1;
-  const preview = hasContent
-    ? savedItems[0].text + (savedItems.length>1 ? ` +${savedItems.length-1} more` : '')
-    : 'Nothing planned yet';
+function buildMonthCard(grid,n,savedItems){
+  const hasContent=savedItems.length>0;
+  const card=document.createElement('div');
+  card.className='month-card'+(hasContent?' has-content open':'');card.dataset.month=n;
+  const name=monthName(n),yearNum=yearOfMonth(n),localN=((n-1)%12)+1;
+  const preview=hasContent?savedItems[0].text+(savedItems.length>1?` +${savedItems.length-1} more`:''):'Nothing planned yet';
+  if(!ui.monthWho[n])ui.monthWho[n]='shared';if(!ui.monthIcon[n])ui.monthIcon[n]='✨';
 
-  if (!ui.monthWho[n]) ui.monthWho[n] = 'shared';
-  if (!ui.monthIcon[n]) ui.monthIcon[n] = '✨';
-
-  card.innerHTML = `
+  card.innerHTML=`
     <div class="month-header" onclick="toggleMonth(this)">
       <div class="month-header-left">
         <div class="month-badge">${name}</div>
-        <div><div class="month-label">Month ${localN}${yearNum>1?' <span style="font-size:10px;opacity:0.6">Y'+yearNum+'</span>':''}</div><div class="month-preview">${preview}</div></div>
+        <div><div class="month-label">Month ${localN}${yearNum>1?` <span style="font-size:10px;opacity:0.6">Y${yearNum}</span>`:''}</div><div class="month-preview">${preview}</div></div>
       </div>
       <div style="display:flex;align-items:center;gap:4px;">
-        ${n === monthCount ? `<button class="month-remove-btn" onclick="removeThisMonth(event,${n})" title="Remove this month">✕</button>` : ''}
+        ${n===monthCount?`<button class="month-remove-btn" onclick="removeThisMonth(event,${n})">✕</button>`:''}
         <span class="month-toggle">⌄</span>
       </div>
     </div>
@@ -1411,7 +1212,7 @@ function buildMonthCard(grid, n, savedItems) {
       <ul class="items-list" id="list-${n}"></ul>
       <div class="add-form">
         <div class="add-row1">
-          <button class="icon-picker-btn" data-month-n="${n}"><span class="mIconDisp" data-month-n="${n}">✨</span></button>
+          <button class="icon-picker-btn" data-mn="${n}"><span class="mIconDisp">✨</span></button>
           <input class="add-input" id="inp-${n}" placeholder="Add something to ${name}…" onkeydown="if(event.key==='Enter')addMonthItem(${n})">
         </div>
         <div class="add-row2">
@@ -1427,190 +1228,135 @@ function buildMonthCard(grid, n, savedItems) {
       </div>
     </div>`;
 
-  const iconBtn = card.querySelector('.icon-picker-btn');
-  const iconDisp = card.querySelector('.mIconDisp');
-  iconBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    openIconPopup(iconBtn, ui.monthIcon[n], ic => {
-      ui.monthIcon[n] = ic;
-      iconDisp.textContent = ic;
-    });
-  });
+  const iconBtn=card.querySelector('[data-mn]');const iconDisp=card.querySelector('.mIconDisp');
+  iconBtn.addEventListener('click',e=>{e.stopPropagation();openIconPopup(iconBtn,ui.monthIcon[n],ic=>{ui.monthIcon[n]=ic;iconDisp.textContent=ic;});});
 
-  card.addEventListener('dragover', e => {
-    // Allow if it's a wish drag (dragId set) but not an internal reorder
-    if (ui.reorderDragEl) return;
-    if (!ui.dragId) return;
-    e.preventDefault();
-    card.classList.add('drag-over');
-  });
-  card.addEventListener('dragleave', e => { if(!card.contains(e.relatedTarget)) card.classList.remove('drag-over'); });
-  card.addEventListener('drop', e => {
-    card.classList.remove('drag-over');
-    if (ui.reorderDragEl) return;
-    if (!ui.dragId) return;
-    e.preventDefault();
-    const wish = getWishById(ui.dragId); if (!wish) return;
+  card.addEventListener('dragover',e=>{if(ui.reorderDragEl||!ui.dragId)return;e.preventDefault();card.classList.add('drag-over');});
+  card.addEventListener('dragleave',e=>{if(!card.contains(e.relatedTarget))card.classList.remove('drag-over');});
+  card.addEventListener('drop',e=>{
+    card.classList.remove('drag-over');if(ui.reorderDragEl||!ui.dragId)return;e.preventDefault();
+    const wish=getWishById(ui.dragId);if(!wish)return;
     document.getElementById('list-'+n).appendChild(makeLi(wish.icon,'shared',wish.text,null,wish.cat||''));
-    card.classList.add('has-content','open');
-    assignWish(ui.dragId, name);
-    ui.dragId = null; scheduleSave();
+    card.classList.add('has-content','open');assignWish(ui.dragId,name);ui.dragId=null;scheduleSave();
   });
 
   grid.appendChild(card);
-  const list = document.getElementById('list-'+n);
-  savedItems.forEach(item => list.appendChild(makeLi(item.icon,item.who,item.text,item.cost,item.cat||'')));
+  const list=document.getElementById('list-'+n);
+  savedItems.forEach(item=>list.appendChild(makeLi(item.icon||'✨',item.who||'shared',item.text,item.cost,item.category||item.cat||'',item.id)));
 }
-
-function removeThisMonth(e, n) {
-  e.stopPropagation();
-  if (n !== monthCount) return;
-  removeLastMonth();
-}
-
-function buildMonths(savedData) {
-  monthCount = savedData?.monthCount || 12;
-  ui.monthItems = {};
-  for (let n = 1; n <= monthCount; n++) {
-    ui.monthItems[n] = savedData?.months?.[n] || getDefaultItems(n);
-    if (!ui.monthWho[n]) ui.monthWho[n] = 'shared';
-    if (!ui.monthIcon[n]) ui.monthIcon[n] = '✨';
-  }
-  updateYearTabs();
-  buildMonthsView();
-}
-
-function getDefaultItems(n) {
-  if (n === 8) return [{text:"I hit €10,000 in savings",who:"ryan",icon:"💰",cost:null}];
-  if (n === 9) return [{text:"We meet with a mortgage adviser",who:"shared",icon:"🏦",cost:null}];
-  return [];
-}
-
 
 /* ============================================================
    WISHLIST
 ============================================================ */
-function getWishById(id) {
-  const el = document.querySelector(`[data-wish="${id}"]`);
-  if (!el) return null;
-  const wishTextEl = el.querySelector('.wish-text');
-  const catPill = wishTextEl?.querySelector('.item-cat');
-  const text = catPill
-    ? (wishTextEl.textContent||'').replace(catPill.textContent,'').trim()
-    : (wishTextEl?.textContent.trim()||'');
-  return { id, icon: el.querySelector('.wish-icon')?.textContent.trim()||'🌟', text, cat: el.dataset.cat||'' };
+function getWishById(id){
+  const el=document.querySelector(`[data-wish="${id}"]`);if(!el)return null;
+  const wtEl=el.querySelector('.wish-text');const catPil=wtEl?.querySelector('.item-cat');
+  const text=catPil?(wtEl.textContent||'').replace(catPil.textContent,'').trim():(wtEl?.textContent.trim()||'');
+  return{id,icon:el.querySelector('.wish-icon')?.textContent.trim()||'🌟',text,cat:el.dataset.cat||''};
 }
 
-function assignWish(id, where) {
-  const el = document.querySelector(`[data-wish="${id}"]`);
-  if (!el) return;
-  el.classList.add('assigned');
-  const badgeHTML = `<span class="wish-badge">Added to ${where}</span>`;
-  const existingSub   = el.querySelector('.wish-sub');
-  const existingBadge = el.querySelector('.wish-badge');
-  if (existingSub)        existingSub.outerHTML   = badgeHTML;
-  else if (existingBadge) existingBadge.outerHTML = badgeHTML;
+function assignWish(id,where){
+  const el=document.querySelector(`[data-wish="${id}"]`);if(!el)return;
+  updateWishBadge(el,where);
 }
 
-function removeWish(btn) { btn.closest('.wish-item').remove(); scheduleSave(); }
+function removeWish(btn){btn.closest('.wish-item').remove();scheduleSave();}
 
-function makeWishEl(w) {
-  const div = document.createElement('div');
-  div.className = 'wish-item'+(w.assigned?' assigned':'');
-  div.dataset.wish = w.id;
-  div.dataset.cat  = w.cat || '';
-  div.draggable = true;
-  const subHTML = (w.assigned && w.assignedTo)
-    ? `<span class="wish-badge">Added to ${w.assignedTo}</span>`
-    : `<span class="wish-sub">${w.sub||'Drag to a month or use ∶'}</span>`;
-  const catBadge = w.cat ? (() => { const c=CATEGORIES.find(x=>x.name===w.cat); return c?`<span class="item-cat" style="background:${c.bg};color:${c.fg}">${c.icon} ${c.name}</span>`:''; })() : '';
-  div.innerHTML = `
+function makeWishEl(w){
+  const div=document.createElement('div');
+  div.className='wish-item'+(w.assigned?' assigned':'');
+  div.dataset.wish=w.id;div.dataset.cat=w.category||w.cat||'';
+  if(w.id&&w.id.toString().includes('-'))div.dataset.dbid=w.id; // uuid from DB
+  div.draggable=true;
+  const sub=(w.assigned&&w.assigned_to)?`<span class="wish-badge">Added to ${w.assigned_to}</span>`:`<span class="wish-sub">${w.sub||'Drag to a month or use ∶'}</span>`;
+  const cat=w.category||w.cat||'';
+  const catBadge=cat?(()=>{const c=CATEGORIES.find(x=>x.name===cat);return c?`<span class="item-cat" style="background:${c.bg};color:${c.fg}">${c.icon} ${c.name}</span>`:''})():'';
+  div.innerHTML=`
     <span class="wish-icon">${w.icon}</span>
     <div style="flex:1;min-width:0">
       <div class="wish-text">${w.text}${catBadge}</div>
-      <div>${subHTML}</div>
+      <div>${sub}</div>
     </div>
     <button class="item-edit" title="Edit" onclick="openEditModal(this,'wish')">✎</button>
     <button class="wish-colon" title="Options">∶</button>
     <button class="wish-delete" onclick="removeWish(this)">×</button>`;
-  div.querySelector('.wish-colon').addEventListener('click', e => { e.stopPropagation(); openCtxMenu(e, div, 'wish'); });
-  div.addEventListener('dragstart', e => {
-    if (e.target.closest('.wish-colon,.wish-delete')) { e.preventDefault(); return; }
-    ui.dragId = w.id;
-    ui.reorderDragEl = null; // not a reorder
-    div.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'copy';
-  });
-  div.addEventListener('dragend', () => div.classList.remove('dragging'));
-  // Long press on mobile
+  div.querySelector('.wish-colon').addEventListener('mousedown',e=>{e.stopPropagation();e.preventDefault();openCtxMenu(e,div,'wish');});
+  div.addEventListener('dragstart',e=>{if(e.target.closest('.wish-colon,.wish-delete,.item-edit')){e.preventDefault();return;}ui.dragId=w.id;ui.reorderDragEl=null;div.classList.add('dragging');e.dataTransfer.effectAllowed='copy';});
+  div.addEventListener('dragend',()=>div.classList.remove('dragging'));
+  div.addEventListener('contextmenu',e=>{e.preventDefault();openCtxMenu(e,div,'wish');});
   let lpt;
-  div.addEventListener('touchstart', e => {
-    if (e.target.closest('.wish-colon,.wish-delete')) return;
-    lpt = setTimeout(() => openCtxMenu(e, div, 'wish'), 600);
-  }, {passive:true});
-  div.addEventListener('touchend',    () => clearTimeout(lpt));
-  div.addEventListener('touchmove',   () => clearTimeout(lpt));
-  div.addEventListener('touchcancel', () => clearTimeout(lpt));
-  div.addEventListener('contextmenu', e => { e.preventDefault(); openCtxMenu(e, div, 'wish'); });
+  div.addEventListener('touchstart',e=>{if(e.target.closest('.wish-colon,.wish-delete,.item-edit'))return;lpt=setTimeout(()=>openCtxMenu(e,div,'wish'),600);},{passive:true});
+  div.addEventListener('touchend',()=>clearTimeout(lpt));div.addEventListener('touchmove',()=>clearTimeout(lpt));
   return div;
 }
 
-function addWishItem() {
-  const inp = document.getElementById('wishInput');
-  const txt = inp.value.trim(); if(!txt) return;
-  const w = {id:'w_'+Date.now(), icon:ui.wishIcon, text:txt, sub:'Drag to a month or use ∶', assigned:false, assignedTo:null, cat:''};
+function addWishItem(){
+  const inp=document.getElementById('wishInput');const txt=inp.value.trim();if(!txt)return;
+  const w={id:'w_'+Date.now(),icon:ui.wishIcon,text:txt,sub:'Drag to a month or use ∶',assigned:false,assigned_to:null,category:''};
   document.getElementById('wishGrid').appendChild(makeWishEl(w));
-  inp.value=''; scheduleSave();
+  inp.value='';scheduleSave();
 }
 
-function buildWishlist(savedItems) {
-  const grid = document.getElementById('wishGrid');
-  grid.innerHTML = '';
-  (savedItems||DEFAULT_WISHLIST).forEach(w => grid.appendChild(makeWishEl(w)));
-}
-
-function buildFutureList(savedItems) {
-  const list = document.getElementById('futureList');
-  list.innerHTML = '';
-  (savedItems||DEFAULT_FUTURE).forEach(item => list.appendChild(makeLi(item.icon,item.who,item.text,item.cost,item.cat||'')));
+function buildWishlist(items){
+  const grid=document.getElementById('wishGrid');grid.innerHTML='';
+  const defaults=[
+    {id:'w1',icon:'✈️',text:'South-East Asia trip',assigned:false,assigned_to:null,category:'Holiday'},
+    {id:'w2',icon:'🏠',text:'Buy a house',assigned:false,assigned_to:null,category:'Home'},
+    {id:'w3',icon:'💍',text:'Get engaged or married',assigned:false,assigned_to:null,category:''},
+    {id:'w4',icon:'🛠️',text:'Build GetDocket',assigned:false,assigned_to:null,category:'Project'},
+    {id:'w5',icon:'📖',text:'Write a novel',assigned:false,assigned_to:null,category:'Creative'},
+  ];
+  (items&&items.length?items:defaults).forEach(w=>grid.appendChild(makeWishEl(w)));
 }
 
 /* ============================================================
-   APPLY REMOTE DATA
+   RESET
 ============================================================ */
-function applyData(data) {
-  if (!data) return;
-  buildMonths(data);
-  buildFutureList(data.future);
-  buildWishlist(data.wishlist);
-  if (data.needsRyan)   document.getElementById('needsRyan').value   = data.needsRyan;
-  if (data.needsLouise) document.getElementById('needsLouise').value = data.needsLouise;
+async function confirmReset(){
+  if(!confirm('Clear everything and start fresh?'))return;
+  await sb.from('items').delete().eq('couple_id',COUPLE_ID);
+  await saveSettings({needs_ryan:'',needs_louise:'',month_count:12});
+  location.reload();
 }
 
 /* ============================================================
    INIT
 ============================================================ */
-async function initApp() {
+async function initApp(user){
+  currentUser=user;
+  // Get member info
+  const{data:member}=await sb.from('couple_members').select('*').eq('email',user.email).eq('couple_id',COUPLE_ID).single();
+  currentMember=member;
+
   wireStaticIconBtns();
-  const data = await dbGet('plan');
-  lastHash = JSON.stringify(data);
-  if (data) { applyData(data); }
-  else      { buildMonths(null); buildFutureList(null); buildWishlist(null); }
-  document.getElementById('needsRyan').addEventListener('input',   scheduleSave);
-  document.getElementById('needsLouise').addEventListener('input', scheduleSave);
-  setInterval(pollForChanges, POLL_MS);
+  document.getElementById('needsRyan').addEventListener('input',scheduleSave);
+  document.getElementById('needsLouise').addEventListener('input',scheduleSave);
+
+  await loadAll();
+  setupRealtime();
+  updatePresence(true);
+  refreshPresenceBar();
+
+  document.getElementById('gate').classList.add('hidden');
+  document.getElementById('mainContent').style.display='block';
+  document.getElementById('presenceBar').style.display='flex';
 }
 
-/* auto-login if already authenticated this session */
-if (sessionStorage.getItem('rmf_auth') === '1') {
-  document.getElementById('gate').classList.add('hidden');
-  document.getElementById('mainContent').style.display = 'block';
-  window.addEventListener('DOMContentLoaded', initApp);
-} else {
-  window.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('gateInput').focus();
+/* ============================================================
+   BOOT — check session on load
+============================================================ */
+window.addEventListener('DOMContentLoaded',async()=>{
+  const{data:{session}}=await sb.auth.getSession();
+  if(session?.user){
+    initApp(session.user);
+  }
+  // Listen for auth state changes (magic link click lands here)
+  sb.auth.onAuthStateChange((event,session)=>{
+    if(event==='SIGNED_IN'&&session?.user){
+      initApp(session.user);
+    }
   });
-}
+});
 </script>
 </body>
 </html>
