@@ -1420,16 +1420,25 @@ async function initApp(user){
 /* ============================================================
    BOOT — check session on load
 ============================================================ */
-window.addEventListener('DOMContentLoaded',async()=>{
-  const{data:{session}}=await sb.auth.getSession();
-  if(session?.user){
-    initApp(session.user);
-  }
-  // Listen for auth state changes (magic link click lands here)
-  sb.auth.onAuthStateChange((event,session)=>{
-    if(event==='SIGNED_IN'&&session?.user){
-      initApp(session.user);
+let appInitialised = false;
+
+async function bootApp(user) {
+  if (appInitialised) return;
+  appInitialised = true;
+  await initApp(user);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Register listener FIRST so it catches the magic link token in the URL fragment
+  sb.auth.onAuthStateChange((event, session) => {
+    if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
+      bootApp(session.user);
     }
+  });
+
+  // Then check for an existing session (already logged-in users)
+  sb.auth.getSession().then(({ data: { session } }) => {
+    if (session?.user) bootApp(session.user);
   });
 });
 </script>
