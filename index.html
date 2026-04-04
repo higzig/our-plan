@@ -97,6 +97,9 @@
   @media(max-width:768px){.item-actions{opacity:1;}}
   .item-edit{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:13px;line-height:1;padding:2px 4px;border-radius:4px;transition:color 0.15s;}
   .item-edit:hover{color:var(--ryan);}
+  .wish-item .item-edit{opacity:0;transition:opacity 0.15s,color 0.15s;}
+  .wish-item:hover .item-edit{opacity:1;}
+  @media(max-width:768px){.wish-item .item-edit{opacity:1;}}
   .item-delete{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:15px;line-height:1;padding:2px 4px;border-radius:4px;transition:color 0.15s;}
   .item-delete:hover{color:var(--louise);}
 
@@ -292,7 +295,7 @@
   <div class="months-grid" id="monthsGrid"></div>
 
   <div class="future-section">
-    <div class="section-title">After April 2027</div>
+    <div class="section-title">Someday</div>
     <div class="future-card" id="futureCard"
          ondragover="futureDragOver(event)" ondragleave="futureDragLeave(event)" ondrop="futureDrop(event)">
       <div class="future-drop-hint">Drop here to plan for after April 2027</div>
@@ -342,12 +345,12 @@
 <!-- EDIT MODAL -->
 <div id="editModal">
   <div class="edit-box">
-    <div class="edit-title">Edit item</div>
+    <div class="edit-title" id="editModalTitle">Edit item</div>
     <div class="edit-row">
       <button class="icon-picker-btn" id="editIconBtn"><span id="editIconDisp">✨</span></button>
       <input class="edit-input" id="editText" placeholder="Item text…">
     </div>
-    <div class="edit-who-group">
+    <div class="edit-who-group" id="editWhoGroup">
       <button class="who-btn ryan" id="ew-ryan" onclick="setEditWho('ryan')">Ryan</button>
       <button class="who-btn louise" id="ew-louise" onclick="setEditWho('louise')">Louise</button>
       <button class="who-btn shared" id="ew-shared" onclick="setEditWho('shared')">Both</button>
@@ -355,6 +358,21 @@
     <div class="edit-cost-row">
       <label class="cost-toggle"><input type="checkbox" id="editCC" onchange="toggleEditCost()"> Has a cost</label>
       <div class="cost-wrap" id="editCW"><span class="cost-sym">€</span><input class="cost-input" id="editCA" type="number" placeholder="0" min="0"></div>
+    </div>
+    <!-- Category picker -->
+    <div style="margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px;">Category</div>
+      <select id="editCatSelect" style="width:100%;background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;cursor:pointer;">
+        <option value="">No category</option>
+      </select>
+    </div>
+    <!-- Assign to month (shown for wishlist and future items) -->
+    <div id="editAssignRow" style="display:none;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px;">Assign to</div>
+      <select id="editAssignSelect" style="width:100%;background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;cursor:pointer;">
+        <option value="">— keep in current section —</option>
+        <option value="someday">Someday</option>
+      </select>
     </div>
     <div class="edit-actions">
       <button class="edit-cancel" onclick="closeEditModal()">Cancel</button>
@@ -800,27 +818,93 @@ function setupTouchDrag(li) {
 /* ============================================================
    EDIT MODAL
 ============================================================ */
-const editModal = { targetLi: null, icon: '✨', who: 'shared' };
+const editModal = { targetEl: null, type: null, icon: '✨', who: 'shared' };
 
-function openEditModal(btn) {
-  const li = btn.closest('.item-row');
-  editModal.targetLi = li;
-  editModal.icon = li.dataset.icon || '✨';
-  editModal.who  = li.dataset.who  || 'shared';
-  const text = li.querySelector('.item-text')?.textContent.trim() || '';
-  const cost = li.dataset.cost || '';
-  document.getElementById('editIconDisp').textContent = editModal.icon;
-  document.getElementById('editText').value = text;
-  document.getElementById('editCC').checked = !!(cost && parseFloat(cost)>0);
-  document.getElementById('editCA').value = cost || '';
-  document.getElementById('editCW').classList.toggle('show', !!(cost && parseFloat(cost)>0));
-  setEditWho(editModal.who);
+function populateCatSelect(currentCat) {
+  const sel = document.getElementById('editCatSelect');
+  sel.innerHTML = '<option value="">No category</option>';
+  CATEGORIES.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.name;
+    opt.textContent = c.icon + ' ' + c.name;
+    if (c.name === currentCat) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function populateAssignSelect() {
+  const sel = document.getElementById('editAssignSelect');
+  sel.innerHTML = '<option value="">— keep in current section —</option><option value="someday">Someday</option>';
+  for (let n = 1; n <= monthCount; n++) {
+    const opt = document.createElement('option');
+    opt.value = String(n);
+    opt.textContent = monthName(n);
+    sel.appendChild(opt);
+  }
+}
+
+function openEditModal(btn, type) {
+  // type: 'item' (month/future rows), 'wish' (wishlist cards)
+  // If called from item-row buttons, btn is the button element
+  // Detect type from context if not passed
+  const liEl   = btn.closest?.('.item-row');
+  const wishEl = btn.closest?.('.wish-item');
+  const el = liEl || wishEl;
+  if (!el) return;
+
+  const resolvedType = type || (liEl ? 'item' : 'wish');
+  editModal.targetEl = el;
+  editModal.type     = resolvedType;
+
+  if (resolvedType === 'wish') {
+    const wishTextEl = el.querySelector('.wish-text');
+    const catPillEl  = wishTextEl?.querySelector('.item-cat');
+    const cleanText  = catPillEl
+      ? (wishTextEl.textContent||'').replace(catPillEl.textContent,'').trim()
+      : (wishTextEl?.textContent.trim()||'');
+    editModal.icon = el.querySelector('.wish-icon')?.textContent.trim() || '🌟';
+    editModal.who  = 'shared';
+    document.getElementById('editModalTitle').textContent = 'Edit wish item';
+    document.getElementById('editIconDisp').textContent = editModal.icon;
+    document.getElementById('editText').value = cleanText;
+    document.getElementById('editCC').checked = false;
+    document.getElementById('editCW').classList.remove('show');
+    document.getElementById('editWhoGroup').style.display = 'none';
+    document.getElementById('editAssignRow').style.display = 'block';
+    populateCatSelect(el.dataset.cat || '');
+    populateAssignSelect();
+    document.getElementById('editAssignSelect').value = '';
+  } else {
+    // item row (month or future)
+    editModal.icon = el.dataset.icon || '✨';
+    editModal.who  = el.dataset.who  || 'shared';
+    const text = el.querySelector('.item-text')?.textContent.trim() || '';
+    const cost = el.dataset.cost || '';
+    const isFuture = !!el.closest('#futureList');
+    document.getElementById('editModalTitle').textContent = 'Edit item';
+    document.getElementById('editIconDisp').textContent = editModal.icon;
+    document.getElementById('editText').value = text;
+    document.getElementById('editCC').checked = !!(cost && parseFloat(cost)>0);
+    document.getElementById('editCA').value = cost || '';
+    document.getElementById('editCW').classList.toggle('show', !!(cost && parseFloat(cost)>0));
+    document.getElementById('editWhoGroup').style.display = 'flex';
+    setEditWho(editModal.who);
+    populateCatSelect(el.dataset.cat || '');
+    // Show assign row for future (Someday) items only
+    if (isFuture) {
+      document.getElementById('editAssignRow').style.display = 'block';
+      populateAssignSelect();
+      document.getElementById('editAssignSelect').value = '';
+    } else {
+      document.getElementById('editAssignRow').style.display = 'none';
+    }
+  }
   document.getElementById('editModal').classList.add('open');
 }
 
 function closeEditModal() {
   document.getElementById('editModal').classList.remove('open');
-  editModal.targetLi = null;
+  editModal.targetEl = null;
 }
 
 function setEditWho(w) {
@@ -834,26 +918,97 @@ function toggleEditCost() {
 }
 
 function saveEditModal() {
-  const li = editModal.targetLi; if (!li) return;
+  const el = editModal.targetEl; if (!el) return;
   const text = document.getElementById('editText').value.trim(); if (!text) return;
-  const chk  = document.getElementById('editCC');
-  const cost = chk.checked ? document.getElementById('editCA').value : null;
-  const icon = editModal.icon;
-  const who  = editModal.who;
-  li.dataset.icon = icon;
-  li.dataset.who  = who;
-  li.dataset.cost = cost || '';
-  li.querySelector('.item-icon').textContent = icon;
-  li.querySelector('.item-text').textContent = text;
-  const oldDot = li.querySelector('.item-dot');
-  if (oldDot) { oldDot.className = `item-dot ${who}`; }
-  const oldCost = li.querySelector('.item-cost-tag');
-  if (oldCost) oldCost.remove();
-  if (cost && parseFloat(cost)>0) {
-    const tag = document.createElement('span');
-    tag.className = 'item-cost-tag';
-    tag.textContent = `€${parseFloat(cost).toLocaleString('en-IE',{minimumFractionDigits:0,maximumFractionDigits:2})}`;
-    li.querySelector('.item-main').appendChild(tag);
+  const catName  = document.getElementById('editCatSelect').value;
+  const assignTo = document.getElementById('editAssignSelect').value;
+  const c = catName ? CATEGORIES.find(x => x.name === catName) : null;
+  const newIcon  = c ? c.icon : editModal.icon;
+
+  if (editModal.type === 'wish') {
+    // Update wish icon, text, cat badge
+    el.querySelector('.wish-icon').textContent = newIcon;
+    el.dataset.cat  = catName;
+    el.dataset.icon = newIcon;
+    const wishTextEl = el.querySelector('.wish-text');
+    const catPillEl  = wishTextEl?.querySelector('.item-cat');
+    if (catPillEl) catPillEl.remove();
+    wishTextEl.textContent = text;
+    if (c) {
+      const pill = document.createElement('span');
+      pill.className = 'item-cat';
+      pill.style.cssText = `background:${c.bg};color:${c.fg}`;
+      pill.textContent = `${c.icon} ${c.name}`;
+      wishTextEl.appendChild(pill);
+    }
+    // Assign to month/someday if chosen
+    if (assignTo) {
+      if (assignTo === 'someday') {
+        document.getElementById('futureList').appendChild(makeLi(newIcon,'shared',text,null,catName));
+        const badgeHTML = `<span class="wish-badge">Added to Someday</span>`;
+        const existingSub = el.querySelector('.wish-sub'); const existingBadge = el.querySelector('.wish-badge');
+        if (existingSub) existingSub.outerHTML = badgeHTML; else if (existingBadge) existingBadge.outerHTML = badgeHTML;
+        el.classList.add('assigned');
+      } else {
+        const n = parseInt(assignTo);
+        const targetYear = yearOfMonth(n);
+        const doAssign = () => {
+          const list = document.getElementById('list-'+n);
+          if (list) { list.appendChild(makeLi(newIcon,'shared',text,null,catName)); document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open'); }
+          const badgeHTML = `<span class="wish-badge">Added to ${monthName(n)}</span>`;
+          const existingSub = el.querySelector('.wish-sub'); const existingBadge = el.querySelector('.wish-badge');
+          if (existingSub) existingSub.outerHTML = badgeHTML; else if (existingBadge) existingBadge.outerHTML = badgeHTML;
+          el.classList.add('assigned');
+        };
+        if (targetYear !== activeYear) { switchYear(targetYear); setTimeout(doAssign, 60); }
+        else doAssign();
+      }
+    }
+  } else {
+    // item row
+    const chk  = document.getElementById('editCC');
+    const cost = chk.checked ? document.getElementById('editCA').value : null;
+    const who  = editModal.who;
+    el.dataset.icon = newIcon;
+    el.dataset.who  = who;
+    el.dataset.cost = cost || '';
+    el.dataset.cat  = catName;
+    el.querySelector('.item-icon').textContent = newIcon;
+    el.querySelector('.item-text').textContent = text;
+    const oldDot = el.querySelector('.item-dot');
+    if (oldDot) oldDot.className = `item-dot ${who}`;
+    const oldCost = el.querySelector('.item-cost-tag'); if (oldCost) oldCost.remove();
+    if (cost && parseFloat(cost)>0) {
+      const tag = document.createElement('span'); tag.className = 'item-cost-tag';
+      tag.textContent = `€${parseFloat(cost).toLocaleString('en-IE',{minimumFractionDigits:0,maximumFractionDigits:2})}`;
+      el.querySelector('.item-main').appendChild(tag);
+    }
+    // Update cat pill
+    const oldCat = el.querySelector('.item-cat'); if (oldCat) oldCat.remove();
+    if (c) {
+      const pill = document.createElement('span'); pill.className = 'item-cat';
+      pill.style.cssText = `background:${c.bg};color:${c.fg}`;
+      pill.textContent = `${c.icon} ${c.name}`;
+      el.querySelector('.item-text').insertAdjacentElement('afterend', pill);
+    }
+    // Move to month if assigned (future items)
+    if (assignTo && assignTo !== '') {
+      if (assignTo === 'someday') {
+        el.remove();
+        document.getElementById('futureList').appendChild(makeLi(newIcon,who,text,cost,catName));
+      } else {
+        const n = parseInt(assignTo);
+        const targetYear = yearOfMonth(n);
+        const item = { icon:newIcon, who, text, cost, cat:catName };
+        el.remove();
+        const doMove = () => {
+          const list = document.getElementById('list-'+n);
+          if (list) { list.appendChild(makeLi(item.icon,item.who,item.text,item.cost,item.cat)); document.querySelector(`[data-month="${n}"]`)?.classList.add('has-content','open'); }
+        };
+        if (targetYear !== activeYear) { switchYear(targetYear); setTimeout(doMove, 60); }
+        else doMove();
+      }
+    }
   }
   closeEditModal();
   scheduleSave();
@@ -903,14 +1058,12 @@ const CATEGORIES = [
 ============================================================ */
 const ctxMenu = document.getElementById('ctxMenu');
 const ctx = { target: null, type: null };
-let ctxJustOpened = false;
 
 function openCtxMenu(e, el, type) {
   e.preventDefault();
   e.stopPropagation();
   ctx.target = el;
   ctx.type   = type;
-  ctxJustOpened = true;
 
   const scroll = document.getElementById('ctxScroll');
   scroll.innerHTML = '';
@@ -931,10 +1084,10 @@ function openCtxMenu(e, el, type) {
     else div.addEventListener('click', () => ctxMoveToMonth(n));
     scroll.appendChild(div);
   }
-  // Also "After April 2027"
+  // Also "Someday"
   const futDiv = document.createElement('div');
   futDiv.className = 'ctx-item';
-  futDiv.innerHTML = `<span class="ctx-icon">🔮</span><span>After April 2027</span>`;
+  futDiv.innerHTML = `<span class="ctx-icon">🔮</span><span>Someday</span>`;
   futDiv.addEventListener('click', () => ctxMoveToFuture());
   scroll.appendChild(futDiv);
 
@@ -968,8 +1121,6 @@ function openCtxMenu(e, el, type) {
   ctxMenu.style.left = Math.min(x, window.innerWidth  - menuW - 10) + 'px';
   ctxMenu.style.top  = Math.min(y + window.scrollY, window.scrollY + window.innerHeight - menuH - 20) + 'px';
   ctxMenu.classList.add('open');
-  // Reset flag after a tick so the global listener doesn't close it immediately
-  requestAnimationFrame(() => { ctxJustOpened = false; });
 }
 
 function ctxMoveToMonth(n) {
@@ -1037,7 +1188,7 @@ function ctxMoveToFuture() {
     document.getElementById('futureList').appendChild(makeLi(icon,'shared',cleanText,null,el.dataset.cat||''));
     const existingSub   = el.querySelector('.wish-sub');
     const existingBadge = el.querySelector('.wish-badge');
-    const badgeHTML = `<span class="wish-badge">Added to After April 2027</span>`;
+    const badgeHTML = `<span class="wish-badge">Added to Someday</span>`;
     if (existingSub)        existingSub.outerHTML   = badgeHTML;
     else if (existingBadge) existingBadge.outerHTML = badgeHTML;
     el.classList.add('assigned');
@@ -1095,8 +1246,9 @@ function closeCtxMenu() {
   ctx.target = null; ctx.type = null;
 }
 
-document.addEventListener('click',   e => { if (ctxJustOpened) return; if (!ctxMenu.contains(e.target)) closeCtxMenu(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeCtxMenu(); } });
+document.addEventListener('mousedown', e => { if (ctxMenu.classList.contains('open') && !ctxMenu.contains(e.target)) closeCtxMenu(); });
+document.addEventListener('touchstart', e => { if (ctxMenu.classList.contains('open') && !ctxMenu.contains(e.target)) closeCtxMenu(); }, {passive:true});
+document.addEventListener('keydown',    e => { if (e.key === 'Escape') closeCtxMenu(); });
 
 /* ============================================================
    FUTURE
@@ -1125,7 +1277,7 @@ function futureDrop(e) {
   e.preventDefault();
   const wish = getWishById(ui.dragId); if(!wish) return;
   document.getElementById('futureList').appendChild(makeLi(wish.icon,'shared',wish.text,null,wish.cat||''));
-  assignWish(ui.dragId,'After April 2027');
+  assignWish(ui.dragId,'Someday');
   ui.dragId=null; scheduleSave();
 }
 
@@ -1378,6 +1530,7 @@ function makeWishEl(w) {
       <div class="wish-text">${w.text}${catBadge}</div>
       <div>${subHTML}</div>
     </div>
+    <button class="item-edit" title="Edit" onclick="openEditModal(this,'wish')">✎</button>
     <button class="wish-colon" title="Options">∶</button>
     <button class="wish-delete" onclick="removeWish(this)">×</button>`;
   div.querySelector('.wish-colon').addEventListener('click', e => { e.stopPropagation(); openCtxMenu(e, div, 'wish'); });
