@@ -414,7 +414,7 @@ const REDIRECT_URL = 'https://higzig.github.io/our-plan/';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
     flowType: 'pkce',
-    detectSessionInUrl: true,
+    detectSessionInUrl: false,
     persistSession: true,
     autoRefreshToken: true,
   }
