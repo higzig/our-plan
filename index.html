@@ -1436,29 +1436,34 @@ async function bootApp(user) {
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
-  // Register listener FIRST
+  // Register listener first
   sb.auth.onAuthStateChange((event, session) => {
     if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
       bootApp(session.user);
     }
   });
 
-  // Handle PKCE code exchange — Supabase puts ?code= in the URL
+  // Check for PKCE code in URL — explicitly exchange it
   const params = new URLSearchParams(window.location.search);
-  if (params.get('code')) {
-    // Exchange the code for a session — Supabase JS handles this automatically
-    // when detectSessionInUrl is true, but we trigger getSession to confirm
-    const { data: { session }, error } = await sb.auth.getSession();
-    if (session?.user) {
-      // Clean the URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-      bootApp(session.user);
-      return;
+  const code = params.get('code');
+  if (code) {
+    try {
+      const { data, error } = await sb.auth.exchangeCodeForSession(code);
+      if (error) {
+        console.error('Code exchange failed:', error.message);
+        document.getElementById('gateError').textContent = 'Sign-in link expired or already used. Request a new one.';
+        document.getElementById('gateError').style.display = 'block';
+      } else if (data?.session?.user) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+        bootApp(data.session.user);
+        return;
+      }
+    } catch(e) {
+      console.error('Exchange error:', e);
     }
-    if (error) console.error('Code exchange error:', error.message);
   }
 
-  // Check for existing persisted session
+  // No code — check for existing persisted session
   const { data: { session } } = await sb.auth.getSession();
   if (session?.user) bootApp(session.user);
 });
