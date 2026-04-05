@@ -542,24 +542,31 @@ async function verifyOTP() {
   errEl.style.display = 'none';
   btn.disabled = true; btn.textContent = 'Signing in…';
 
-  // Try 'email' type first, then 'magiclink' as fallback
-  let data, error;
-  for (const type of ['email', 'magiclink', 'signup']) {
-    ({ data, error } = await sb.auth.verifyOtp({
+  try {
+    const { data, error } = await sb.auth.verifyOtp({
       email: otpEmail,
-      token,
-      type
-    }));
-    if (!error && data?.session?.user) break;
-  }
+      token: token,
+      type: 'email'
+    });
 
-  if (error || !data?.session?.user) {
-    errEl.textContent = 'Incorrect or expired code. Try again or request a new one.';
+    if (error) {
+      console.error('OTP error:', error);
+      errEl.textContent = error.message || 'Incorrect or expired code. Try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Sign in';
+      document.getElementById('gateOTP').value = '';
+    } else if (data?.user) {
+      bootApp(data.user);
+    } else {
+      errEl.textContent = 'Something went wrong. Please try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Sign in';
+    }
+  } catch(e) {
+    console.error('Verify exception:', e);
+    errEl.textContent = 'Connection error. Please try again.';
     errEl.style.display = 'block';
     btn.disabled = false; btn.textContent = 'Sign in';
-    document.getElementById('gateOTP').value = '';
-  } else {
-    bootApp(data.session.user);
   }
 }
 
