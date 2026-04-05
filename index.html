@@ -263,8 +263,8 @@
     <!-- Step 2: code entry -->
     <div id="gateStep2" style="display:none">
       <div class="gate-sub" id="gateStep2Sub">Check your email for a 6-digit code.</div>
-      <input class="gate-input" type="text" id="gateOTP" placeholder="000000"
-        maxlength="6" inputmode="numeric" autocomplete="one-time-code"
+      <input class="gate-input" type="text" id="gateOTP" placeholder="00000000"
+        maxlength="8" inputmode="numeric" autocomplete="one-time-code"
         onkeydown="if(event.key==='Enter')verifyOTP()">
       <button class="gate-btn" id="gateVerifyBtn" onclick="verifyOTP()">Sign in</button>
       <div class="gate-error" id="gateOTPError" style="display:none"></div>
@@ -536,24 +536,29 @@ async function sendOTP() {
 
 async function verifyOTP() {
   const token = document.getElementById('gateOTP').value.trim().replace(/\s/g, '');
-  if (token.length < 6) return;
+  if (token.length < 4) return;
   const btn = document.getElementById('gateVerifyBtn');
   const errEl = document.getElementById('gateOTPError');
   errEl.style.display = 'none';
   btn.disabled = true; btn.textContent = 'Signing in…';
 
-  const { data, error } = await sb.auth.verifyOtp({
-    email: otpEmail,
-    token,
-    type: 'email'
-  });
+  // Try 'email' type first, then 'magiclink' as fallback
+  let data, error;
+  for (const type of ['email', 'magiclink', 'signup']) {
+    ({ data, error } = await sb.auth.verifyOtp({
+      email: otpEmail,
+      token,
+      type
+    }));
+    if (!error && data?.session?.user) break;
+  }
 
-  if (error) {
+  if (error || !data?.session?.user) {
     errEl.textContent = 'Incorrect or expired code. Try again or request a new one.';
     errEl.style.display = 'block';
     btn.disabled = false; btn.textContent = 'Sign in';
     document.getElementById('gateOTP').value = '';
-  } else if (data?.session?.user) {
+  } else {
     bootApp(data.session.user);
   }
 }
