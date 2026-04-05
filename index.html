@@ -411,7 +411,14 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const COUPLE_ID   = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
 const REDIRECT_URL = 'https://higzig.github.io/our-plan/';
 
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    flowType: 'pkce',
+    detectSessionInUrl: true,
+    persistSession: true,
+    autoRefreshToken: true,
+  }
+});
 
 /* ============================================================
    MONTH HELPERS
@@ -1428,18 +1435,32 @@ async function bootApp(user) {
   await initApp(user);
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  // Register listener FIRST so it catches the magic link token in the URL fragment
+window.addEventListener('DOMContentLoaded', async () => {
+  // Register listener FIRST
   sb.auth.onAuthStateChange((event, session) => {
     if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
       bootApp(session.user);
     }
   });
 
-  // Then check for an existing session (already logged-in users)
-  sb.auth.getSession().then(({ data: { session } }) => {
-    if (session?.user) bootApp(session.user);
-  });
+  // Handle PKCE code exchange — Supabase puts ?code= in the URL
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('code')) {
+    // Exchange the code for a session — Supabase JS handles this automatically
+    // when detectSessionInUrl is true, but we trigger getSession to confirm
+    const { data: { session }, error } = await sb.auth.getSession();
+    if (session?.user) {
+      // Clean the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      bootApp(session.user);
+      return;
+    }
+    if (error) console.error('Code exchange error:', error.message);
+  }
+
+  // Check for existing persisted session
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) bootApp(session.user);
 });
 </script>
 </body>
