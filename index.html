@@ -784,13 +784,15 @@ async function updatePresence(online){
   if(!currentUser) return;
   if(online){
     await sb.from('presence').upsert({
-      couple_id:COUPLE_ID,
-      user_email:currentUser.email,
-      display_name:currentMember?.display_name||currentUser.email,
-      last_seen:new Date().toISOString()
-    },{onConflict:'user_email,couple_id'});
+      couple_id: COUPLE_ID,
+      user_email: currentUser.email,
+      display_name: currentMember?.display_name || currentUser.email,
+      last_seen: new Date().toISOString()
+    }, { onConflict: 'couple_id,user_email' });
   } else {
-    await sb.from('presence').delete().eq('user_email',currentUser.email).eq('couple_id',COUPLE_ID);
+    await sb.from('presence').delete()
+      .eq('user_email', currentUser.email)
+      .eq('couple_id', COUPLE_ID);
   }
 }
 
@@ -877,13 +879,14 @@ function catPillHTML(cat){
   if(!c)return'';
   return`<span class="item-cat" style="background:${c.bg};color:${c.fg}">${c.icon} ${c.name}</span>`;
 }
-function populateCatSelect(selId,current){
-  const sel=document.getElementById(selId);
-  sel.innerHTML='<option value="">No category</option>';
-  CATEGORIES.forEach(c=>{
-    const o=document.createElement('option');
-    o.value=c.name;o.textContent=c.icon+' '+c.name;
-    if(c.name===current)o.selected=true;
+function populateCatSelect(selId, current){
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  sel.innerHTML = '<option value="">No category</option>';
+  CATEGORIES.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.name; o.textContent = c.icon + ' ' + c.name;
+    if (c.name === current) o.selected = true;
     sel.appendChild(o);
   });
 }
@@ -1358,20 +1361,21 @@ function buildMonthCard(grid,n,savedItems){
       </div>
     </div>`;
 
-  // Populate category select
-  populateCatSelect('mcat-'+n,'');
-
-  card.addEventListener('dragover',e=>{if(ui.reorderDragEl||!ui.dragId)return;e.preventDefault();card.classList.add('drag-over');});
-  card.addEventListener('dragleave',e=>{if(!card.contains(e.relatedTarget))card.classList.remove('drag-over');});
-  card.addEventListener('drop',e=>{
-    card.classList.remove('drag-over');if(ui.reorderDragEl||!ui.dragId)return;e.preventDefault();
-    const wish=getWishById(ui.dragId);if(!wish)return;
+  card.addEventListener('dragover', e => { if(ui.reorderDragEl||!ui.dragId) return; e.preventDefault(); card.classList.add('drag-over'); });
+  card.addEventListener('dragleave', e => { if(!card.contains(e.relatedTarget)) card.classList.remove('drag-over'); });
+  card.addEventListener('drop', e => {
+    card.classList.remove('drag-over'); if(ui.reorderDragEl||!ui.dragId) return; e.preventDefault();
+    const wish = getWishById(ui.dragId); if(!wish) return;
     document.getElementById('list-'+n).appendChild(makeLi(wish.icon,'shared',wish.text,null,wish.cat||'','',wish.desc||''));
-    card.classList.add('has-content','open');assignWish(ui.dragId,name);ui.dragId=null;scheduleSave();
+    card.classList.add('has-content','open'); assignWish(ui.dragId,name); ui.dragId=null; scheduleSave();
   });
 
   grid.appendChild(card);
-  const list=document.getElementById('list-'+n);
+
+  // Populate category select AFTER card is in DOM
+  populateCatSelect('mcat-'+n, '');
+
+  const list = document.getElementById('list-'+n);
   savedItems.forEach(item=>list.appendChild(makeLi(item.icon||'✨',item.who||'shared',item.text,item.cost,item.category||item.cat||'',item.id,item.description||item.desc||'')));
 }
 
